@@ -158,10 +158,10 @@ public class RobotPlayer {
 		int count = 0;
 		for (; count < enemyPastrLocation.length; count++)
 		{
-			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count, enemyPastrLocation[count].x);
-			//System.out.println("Broadcasting " + enemyPastrLocation[count].x + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count));
+			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count * 2, enemyPastrLocation[count].x);
+			System.out.println("Broadcasting " + enemyPastrLocation[count].x + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count));
 			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count * 2 + 1, enemyPastrLocation[count].y);
-			//System.out.println("Broadcasting " + enemyPastrLocation[count].y + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count + 1));
+			System.out.println("Broadcasting " + enemyPastrLocation[count].y + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count + 1));
 		}
 		
 		rc.broadcast(ENEMY_PASTR_COUNT_INDEX, count);
