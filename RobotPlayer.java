@@ -5,11 +5,22 @@ import battlecode.common.*;
 import java.util.*;
 
 public class RobotPlayer {
-	static Random rand;
-	static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
+	final static Direction[] directions = 
+	{
+		Direction.NORTH, 
+		Direction.NORTH_EAST, 
+		Direction.EAST, 
+		Direction.SOUTH_EAST, 
+		Direction.SOUTH, 
+		Direction.SOUTH_WEST, 
+		Direction.WEST, 
+		Direction.NORTH_WEST
+	};
 	final static int ENEMY_PASTR_COUNT_INDEX = 0;
 	final static int ENEMY_PASTR_START_INDEX = 1;
 	final static int ENEMY_PASTR_DATA_SIZE = 20;
+	
+	static Random rand;
 	
 	public static void run(RobotController rc) {
 		rand = new Random(rc.getRobot().getID());
@@ -20,7 +31,7 @@ public class RobotPlayer {
 		}
 		else if (rc.getType() == RobotType.HQ)
 		{
-			runHQ(rc);
+			runHq(rc);
 		}
 	}
 	
@@ -66,7 +77,7 @@ public class RobotPlayer {
 		}
 	}
 	
-	public static void runHQ(RobotController rc)
+	public static void runHq(RobotController rc)
 	{
 		try
 		{
@@ -74,17 +85,24 @@ public class RobotPlayer {
 			{
 				rc.broadcast(i + ENEMY_PASTR_START_INDEX, -1);
 			}
-			
-			while (true)
+		}
+		catch (Exception e)
+		{
+			System.out.println("HQ Exception");
+		}
+		
+		while (true)
+		{
+			try
 			{
 				broadcastEnemyPastrs(rc);
 				spawnRobot(rc);
 				rc.yield();
 			}
-		}
-		catch (Exception e)
-		{
-			System.out.println("HQ Exception");
+			catch (Exception e)
+			{
+				System.out.println("HQ Exception");
+			}
 		}
 	}
 
