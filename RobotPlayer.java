@@ -54,25 +54,15 @@ public class RobotPlayer {
 					if (rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX) > 0)
 					{
 						MapLocation currentLocation = rc.getLocation();
+						MapLocation enemyPastr = new MapLocation(rc.readBroadcast(ENEMY_PASTR_START_INDEX),
+																rc.readBroadcast(ENEMY_PASTR_START_INDEX) + 1);
+						Direction moveDirection = currentLocation.directionTo(enemyPastr);
 						
-						int dx = rc.readBroadcast(ENEMY_PASTR_START_INDEX) - currentLocation.x;
-						int dy = rc.readBroadcast(ENEMY_PASTR_START_INDEX + 1) - currentLocation.y;
-						Direction moveDirection = getDirection(dx, dy);
-						if (rc.canMove(moveDirection)) {
-							rc.move(moveDirection);
+						while (!rc.canMove(moveDirection)) {
+							moveDirection = moveDirection.rotateLeft();
 						}
-						else
-						{
-							if (!moveDirection.isDiagonal())
-							{
-								moveDirection.rotateLeft();
-							}
-							
-							moveDirection.rotateLeft();
-							if (rc.canMove(moveDirection)) {
-								rc.move(moveDirection);
-							}
-						}
+						
+						rc.move(moveDirection);
 					}
 					else
 					{
@@ -86,7 +76,7 @@ public class RobotPlayer {
 				}
 			} 
 			catch (Exception e) {
-				System.out.println("Soldier Exception");
+				System.out.println("Soldier Exception " + e.getMessage());
 			}
 		}
 	}
@@ -132,8 +122,7 @@ public class RobotPlayer {
 
 	private static void broadcastEnemyPastrs(RobotController rc)
 			throws GameActionException {
-		MapLocation[] enemyPastrLocation;
-		enemyPastrLocation = rc.sensePastrLocations(rc.getTeam().opponent());
+		 MapLocation[] enemyPastrLocation = rc.sensePastrLocations(rc.getTeam().opponent());
 		int count = 0;
 		for (; count < enemyPastrLocation.length; count++)
 		{
@@ -142,17 +131,5 @@ public class RobotPlayer {
 		}
 		
 		rc.broadcast(ENEMY_PASTR_COUNT_INDEX, count);
-	}
-	
-	private static Direction getDirection(int dx, int dy)
-	{
-		if (dx >= 0 && dy >= 0)
-			return Direction.SOUTH_EAST;
-		else if (dx >= 0 && dy <= 0)
-			return Direction.NORTH_EAST;
-		else if (dx <= 0 && dy >= 0)
-			return Direction.SOUTH_WEST;
-		else
-			return Direction.NORTH_EAST;
 	}
 }
