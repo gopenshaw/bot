@@ -44,75 +44,35 @@ public class RobotPlayer {
 	
 	public static void runSoldier(RobotController rc)
 	{
-		int myID = rc.getRobot().getID();
-		rc.setIndicatorString(2, "" + myID);
+		int robotID = rc.getRobot().getID();
+		rc.setIndicatorString(2, "" + robotID);
+		boolean followingWall = false;
 		
 		while (true)
 		{
 			try {
 				if (rc.isActive()) {
 					
-					Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 10, rc.getTeam().opponent());
+					Robot[] nearbyEnemies = 
+							rc.senseNearbyGameObjects(Robot.class, 10, rc.getTeam().opponent());
 					
 					if (nearbyEnemies.length >= SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD
 						&& rc.getHealth() < SELF_DESTRUCT_HEALTH_THRESHOLD)
 					{
-						rc.setIndicatorString(0, "Self-destruct engaged.");
-						for (int i = 0; i < SELF_DESTRUCT_WALK_STEPS; i++)
-						{
-							MapLocation currentLocation = rc.getLocation();
-							MapLocation enemyLocation = rc.senseRobotInfo(nearbyEnemies[0]).location;
-							Direction moveDirection = currentLocation.directionTo(enemyLocation);
-							if (rc.canMove(moveDirection))
-							{
-								rc.move(moveDirection);
-							}
-							
-							rc.selfDestruct();
-						}
+						initiateSelfDestruct(rc, nearbyEnemies);
 					}
 					else if (nearbyEnemies.length > 0)
 					{
-						rc.setIndicatorString(0, "Attacking an enemy");
-						for (int i = 0; i < nearbyEnemies.length; i++)
-						{
-							RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[i]);
-							if (robotInfo.type != RobotType.HQ)
-							{
-								rc.attackSquare(robotInfo.location);
-								break;
-							}
-						}
+						attackAnEnemy(rc, nearbyEnemies);
 					}
 					else if (rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX) > 0)
 					{
-						int pastrIndexToAttack = myID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
-						rc.setIndicatorString(0, "Moving toward enemy PASTR " + pastrIndexToAttack);
-						MapLocation currentLocation = rc.getLocation();
-						
-						MapLocation enemyPastr = new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
-																rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
-						rc.setIndicatorString(1, "" + enemyPastr.x + " " + enemyPastr.y);
-						Direction moveDirection = currentLocation.directionTo(enemyPastr);
-					
-						if (myID % 2 == 0)
-						{
-							while (!rc.canMove(moveDirection)) {
-								moveDirection = moveDirection.rotateLeft();
-							}
-						}
-						else
-						{
-							while (!rc.canMove(moveDirection)) {
-								moveDirection = moveDirection.rotateRight();
-							}
-						}
-						
-						
-						rc.move(moveDirection);
+						followingWall = goToAnEnemyPastr(rc, robotID,
+								followingWall);
 					}
 					else
 					{
+						//--TODO this should go to center of board
 						rc.setIndicatorString(0, "Moving randomly");
 						Direction moveDirection = directions[rand.nextInt(8)];
 						if (rc.canMove(moveDirection)) {
@@ -126,6 +86,85 @@ public class RobotPlayer {
 			catch (Exception e) {
 				System.out.println("Soldier Exception " + e.getMessage());
 			}
+		}
+	}
+
+	private static boolean goToAnEnemyPastr(
+			RobotController rc, int robotID, boolean followingWall) throws GameActionException 
+	{
+		int pastrIndexToAttack = robotID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
+		rc.setIndicatorString(0, "Moving toward enemy PASTR " + pastrIndexToAttack);
+		MapLocation currentLocation = rc.getLocation();
+		MapLocation enemyPastr = 
+				new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
+								rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
+		
+		rc.setIndicatorString(1, "" + enemyPastr.x + " " + enemyPastr.y);
+		Direction moveDirection = currentLocation.directionTo(enemyPastr);
+
+		if (!followingWall)
+		{
+			if (rc.canMove(moveDirection))
+			{
+				rc.move(moveDirection);
+			}
+		}
+		else
+		{
+			Direction tempDirection = moveDirection.rotateLeft();
+			while (!rc.canMove(tempDirection))
+			{
+				tempDirection = moveDirection.rotateLeft();
+			}
+			
+			followingWall = true;
+		}
+		
+//						if (myID % 2 == 0)
+//						{
+//							while (!rc.canMove(moveDirection)) {
+//								moveDirection = moveDirection.rotateLeft();
+//							}
+//						}
+//						else
+//						{
+//							while (!rc.canMove(moveDirection)) {
+//								moveDirection = moveDirection.rotateRight();
+//							}
+//						}
+//						
+//						rc.move(moveDirection);
+		return followingWall;
+	}
+
+	private static void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
+			throws GameActionException {
+		rc.setIndicatorString(0, "Attacking an enemy");
+		for (int i = 0; i < nearbyEnemies.length; i++)
+		{
+			RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[i]);
+			if (robotInfo.type != RobotType.HQ)
+			{
+				rc.attackSquare(robotInfo.location);
+				break;
+			}
+		}
+	}
+
+	private static void initiateSelfDestruct(RobotController rc,
+			Robot[] nearbyEnemies) throws GameActionException {
+		rc.setIndicatorString(0, "Self-destruct engaged.");
+		for (int i = 0; i < SELF_DESTRUCT_WALK_STEPS; i++)
+		{
+			MapLocation currentLocation = rc.getLocation();
+			MapLocation enemyLocation = rc.senseRobotInfo(nearbyEnemies[0]).location;
+			Direction moveDirection = currentLocation.directionTo(enemyLocation);
+			if (rc.canMove(moveDirection))
+			{
+				rc.move(moveDirection);
+			}
+			
+			rc.selfDestruct();
 		}
 	}
 	
