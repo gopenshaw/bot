@@ -34,7 +34,10 @@ public class RobotPlayer {
 					Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 10, rc.getTeam().opponent());
 					if (nearbyEnemies.length > 0) {
 						RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[0]);
-						rc.attackSquare(robotInfo.location);
+						if (robotInfo.type != RobotType.HQ)
+						{
+							rc.attackSquare(robotInfo.location);
+						}
 					}
 					
 					if (rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX) > 0)
