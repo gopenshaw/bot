@@ -86,10 +86,12 @@ public class RobotPlayer {
 					}
 					else if (rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX) > 0)
 					{
-						rc.setIndicatorString(0, "Moving toward enemy PASTR");
+						int pastrIndexToAttack = myID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
+						rc.setIndicatorString(0, "Moving toward enemy PASTR " + pastrIndexToAttack);
 						MapLocation currentLocation = rc.getLocation();
-						MapLocation enemyPastr = new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START),
-																rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + 1));
+						
+						MapLocation enemyPastr = new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
+																rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
 						rc.setIndicatorString(1, "" + enemyPastr.x + " " + enemyPastr.y);
 						Direction moveDirection = currentLocation.directionTo(enemyPastr);
 					
@@ -161,9 +163,9 @@ public class RobotPlayer {
 		for (; count < enemyPastrLocation.length; count++)
 		{
 			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count * 2, enemyPastrLocation[count].x);
-			System.out.println("Broadcasting " + enemyPastrLocation[count].x + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count));
+			//System.out.println("Broadcasting " + enemyPastrLocation[count].x + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count));
 			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count * 2 + 1, enemyPastrLocation[count].y);
-			System.out.println("Broadcasting " + enemyPastrLocation[count].y + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count + 1));
+			//System.out.println("Broadcasting " + enemyPastrLocation[count].y + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count + 1));
 		}
 		
 		rc.broadcast(ENEMY_PASTR_COUNT_INDEX, count);
