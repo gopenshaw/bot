@@ -61,6 +61,18 @@ public class RobotPlayer {
 						if (rc.canMove(moveDirection)) {
 							rc.move(moveDirection);
 						}
+						else
+						{
+							if (!moveDirection.isDiagonal())
+							{
+								moveDirection.rotateLeft();
+							}
+							
+							moveDirection.rotateLeft();
+							if (rc.canMove(moveDirection)) {
+								rc.move(moveDirection);
+							}
+						}
 					}
 					else
 					{
@@ -69,6 +81,8 @@ public class RobotPlayer {
 							rc.move(moveDirection);
 						}
 					}
+					
+					rc.yield();
 				}
 			} 
 			catch (Exception e) {
