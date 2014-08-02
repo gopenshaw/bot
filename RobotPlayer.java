@@ -44,6 +44,9 @@ public class RobotPlayer {
 	
 	public static void runSoldier(RobotController rc)
 	{
+		int myID = rc.getRobot().getID();
+		rc.setIndicatorString(2, "" + myID);
+		
 		while (true)
 		{
 			try {
@@ -89,10 +92,20 @@ public class RobotPlayer {
 																rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + 1));
 						rc.setIndicatorString(1, "" + enemyPastr.x + " " + enemyPastr.y);
 						Direction moveDirection = currentLocation.directionTo(enemyPastr);
-						
-						while (!rc.canMove(moveDirection)) {
-							moveDirection = moveDirection.rotateLeft();
+					
+						if (myID % 2 == 0)
+						{
+							while (!rc.canMove(moveDirection)) {
+								moveDirection = moveDirection.rotateLeft();
+							}
 						}
+						else
+						{
+							while (!rc.canMove(moveDirection)) {
+								moveDirection = moveDirection.rotateRight();
+							}
+						}
+						
 						
 						rc.move(moveDirection);
 					}
