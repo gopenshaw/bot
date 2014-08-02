@@ -18,8 +18,8 @@ public class RobotPlayer {
 	};
 	//--Broadcasting
 	final static int ENEMY_PASTR_COUNT_INDEX = 0;
-	final static int ENEMY_PASTR_START_INDEX = 1;
-	final static int ENEMY_PASTR_DATA_SIZE = 20;
+	final static int ENEMY_PASTR_LOCATION_DATA_START = 1;
+	final static int ENEMY_PASTR_LOCATION_DATA_SIZE = 20;
 	
 	//--Soldier self destruct
 	final static int SELF_DESTRUCT_HEALTH_THRESHOLD = 35;
@@ -65,24 +65,17 @@ public class RobotPlayer {
 							
 							rc.selfDestruct();
 						}
-						
 					}
-					
-					for (int i = 0; i < nearbyEnemies.length; i++)
+					else if (nearbyEnemies.length > 0)
 					{
-						RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[i]);
-						if (robotInfo.type != RobotType.HQ)
-						{
-							rc.attackSquare(robotInfo.location);
-							break;
-						}
+						RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[0]);
+						rc.attackSquare(robotInfo.location);
 					}
-					
-					if (rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX) > 0)
+					else if (rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX) > 0)
 					{
 						MapLocation currentLocation = rc.getLocation();
-						MapLocation enemyPastr = new MapLocation(rc.readBroadcast(ENEMY_PASTR_START_INDEX),
-																rc.readBroadcast(ENEMY_PASTR_START_INDEX) + 1);
+						MapLocation enemyPastr = new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START),
+																rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + 1));
 						Direction moveDirection = currentLocation.directionTo(enemyPastr);
 						
 						while (!rc.canMove(moveDirection)) {
@@ -112,9 +105,9 @@ public class RobotPlayer {
 	{
 		try
 		{
-			for (int i = 0; i < ENEMY_PASTR_DATA_SIZE; i++)
+			for (int i = 0; i < ENEMY_PASTR_LOCATION_DATA_SIZE; i++)
 			{
-				rc.broadcast(i + ENEMY_PASTR_START_INDEX, -1);
+				rc.broadcast(i + ENEMY_PASTR_LOCATION_DATA_START, -1);
 			}
 		}
 		catch (Exception e)
@@ -149,12 +142,12 @@ public class RobotPlayer {
 
 	private static void broadcastEnemyPastrs(RobotController rc)
 			throws GameActionException {
-		 MapLocation[] enemyPastrLocation = rc.sensePastrLocations(rc.getTeam().opponent());
+		MapLocation[] enemyPastrLocation = rc.sensePastrLocations(rc.getTeam().opponent());
 		int count = 0;
 		for (; count < enemyPastrLocation.length; count++)
 		{
-			rc.broadcast(ENEMY_PASTR_START_INDEX + count, enemyPastrLocation[count].x);
-			rc.broadcast(ENEMY_PASTR_START_INDEX + count + 1, enemyPastrLocation[count].y);
+			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count, enemyPastrLocation[count].x);
+			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count + 1, enemyPastrLocation[count].y);
 		}
 		
 		rc.broadcast(ENEMY_PASTR_COUNT_INDEX, count);
