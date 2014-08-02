@@ -66,12 +66,18 @@ public class RobotPlayer {
 							rc.selfDestruct();
 						}
 					}
-					else if (nearbyEnemies.length > 0)
+					
+					for (int i = 0; i < nearbyEnemies.length; i++)
 					{
-						RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[0]);
-						rc.attackSquare(robotInfo.location);
+						RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[i]);
+						if (robotInfo.type != RobotType.HQ)
+						{
+							rc.attackSquare(robotInfo.location);
+							rc.yield();
+						}
 					}
-					else if (rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX) > 0)
+					
+					if (rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX) > 0)
 					{
 						MapLocation currentLocation = rc.getLocation();
 						MapLocation enemyPastr = new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START),
@@ -96,7 +102,7 @@ public class RobotPlayer {
 				}
 			}
 			catch (Exception e) {
-				//System.out.println("Soldier Exception ");
+				System.out.println("Soldier Exception " + e.getMessage());
 			}
 		}
 	}
