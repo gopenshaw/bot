@@ -10,8 +10,6 @@ import java.util.*;
 public class RobotPlayer {
 	static Random rand;
 	static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
-	static final int LEADER_CHANNEL = 0;
-	static int currentLeader = -1;
 	
 	public static void run(RobotController rc) {
 		rand = new Random();
@@ -29,39 +27,14 @@ public class RobotPlayer {
 	public static void runSoldier(RobotController rc)
 	{
 		final int MY_ID = rc.getRobot().getID();
-		System.out.println(MY_ID);
 		
 		while (true)
 		{
 			try {
 				if (rc.isActive()) {
-					if (currentLeader == -1)
-					{
-						int leader = rc.readBroadcast(LEADER_CHANNEL);
-						if (leader == 0)
-						{
-							rc.broadcast(LEADER_CHANNEL, MY_ID);
-							currentLeader = MY_ID;
-						}
-						else
-						{
-							currentLeader = leader;
-						}
-					}
-					
-					if (currentLeader == MY_ID)
-					{
-						if (rc.canMove(Direction.WEST))
-						{
-							rc.move(Direction.WEST);
-						}
-					}
-					else
-					{
-						Direction moveDirection = directions[rand.nextInt(8)];
-						if (rc.canMove(moveDirection)) {
-							rc.move(moveDirection);
-						}
+					Direction moveDirection = directions[rand.nextInt(8)];
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
 					}
 				}
 			} 
