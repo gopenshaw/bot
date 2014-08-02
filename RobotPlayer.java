@@ -115,12 +115,12 @@ public class RobotPlayer {
 	private static Direction getDirection(int dx, int dy)
 	{
 		if (dx >= 0 && dy >= 0)
-			return Direction.NORTH_EAST;
-		else if (dx <= 0 && dy <= 0)
-			return Direction.SOUTH_WEST;
-		else if (dx <= 0 && dy <= 0)
 			return Direction.SOUTH_EAST;
-		else
+		else if (dx >= 0 && dy <= 0)
+			return Direction.NORTH_EAST;
+		else if (dx <= 0 && dy >= 0)
 			return Direction.SOUTH_WEST;
+		else
+			return Direction.NORTH_EAST;
 	}
 }
