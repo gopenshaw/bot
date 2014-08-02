@@ -17,8 +17,9 @@ public class RobotPlayer {
 		Direction.NORTH_WEST
 	};
 	//--Broadcasting
-	final static int ENEMY_PASTR_COUNT_INDEX = 0;
-	final static int ENEMY_PASTR_LOCATION_DATA_START = 1;
+	final static int BUILD_PASTR_INDEX = 0;
+	final static int ENEMY_PASTR_COUNT_INDEX = 1;
+	final static int ENEMY_PASTR_LOCATION_DATA_START = 2;
 	final static int ENEMY_PASTR_LOCATION_DATA_SIZE = 20;
 	
 	//--Soldier self destruct
@@ -115,18 +116,6 @@ public class RobotPlayer {
 	
 	public static void runHq(RobotController rc)
 	{
-		try
-		{
-			for (int i = 0; i < ENEMY_PASTR_LOCATION_DATA_SIZE; i++)
-			{
-				rc.broadcast(i + ENEMY_PASTR_LOCATION_DATA_START, -1);
-			}
-		}
-		catch (Exception e)
-		{
-			System.out.println("HQ Exception");
-		}
-		
 		while (true)
 		{
 			try
