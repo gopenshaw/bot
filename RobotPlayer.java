@@ -19,6 +19,7 @@ public class RobotPlayer {
 	final static int ENEMY_PASTR_COUNT_INDEX = 0;
 	final static int ENEMY_PASTR_START_INDEX = 1;
 	final static int ENEMY_PASTR_DATA_SIZE = 20;
+	final static int SELF_DESTRUCT_HEALTH_THRESHOLD = 15;
 	
 	static Random rand;
 	
@@ -43,11 +44,26 @@ public class RobotPlayer {
 				if (rc.isActive()) {
 					
 					Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class, 10, rc.getTeam().opponent());
-					if (nearbyEnemies.length > 0) {
-						RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[0]);
+					
+					for (int i = 0; i < nearbyEnemies.length; i++)
+					{
+						RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[i]);
 						if (robotInfo.type != RobotType.HQ)
 						{
+							if (rc.getHealth() < SELF_DESTRUCT_HEALTH_THRESHOLD)
+							{
+								MapLocation currentLocation = rc.getLocation();
+								Direction moveDirection = currentLocation.directionTo(robotInfo.location);
+								if (rc.canMove(moveDirection))
+								{
+									rc.move(moveDirection);
+								}
+								
+								rc.selfDestruct();
+							}
+							
 							rc.attackSquare(robotInfo.location);
+							break;
 						}
 					}
 					
