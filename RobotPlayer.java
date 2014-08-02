@@ -53,6 +53,7 @@ public class RobotPlayer {
 					if (nearbyEnemies.length >= SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD
 						&& rc.getHealth() < SELF_DESTRUCT_HEALTH_THRESHOLD)
 					{
+						rc.setIndicatorString(0, "Self-destruct engaged.");
 						for (int i = 0; i < SELF_DESTRUCT_WALK_STEPS; i++)
 						{
 							MapLocation currentLocation = rc.getLocation();
@@ -68,6 +69,7 @@ public class RobotPlayer {
 					}
 					else if (nearbyEnemies.length > 0)
 					{
+						rc.setIndicatorString(0, "Attacking an enemy");
 						for (int i = 0; i < nearbyEnemies.length; i++)
 						{
 							RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[i]);
@@ -80,9 +82,11 @@ public class RobotPlayer {
 					}
 					else if (rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX) > 0)
 					{
+						rc.setIndicatorString(0, "Moving toward enemy PASTR");
 						MapLocation currentLocation = rc.getLocation();
 						MapLocation enemyPastr = new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START),
 																rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + 1));
+						rc.setIndicatorString(1, "" + enemyPastr.x + " " + enemyPastr.y);
 						Direction moveDirection = currentLocation.directionTo(enemyPastr);
 						
 						while (!rc.canMove(moveDirection)) {
@@ -93,6 +97,7 @@ public class RobotPlayer {
 					}
 					else
 					{
+						rc.setIndicatorString(0, "Moving randomly");
 						Direction moveDirection = directions[rand.nextInt(8)];
 						if (rc.canMove(moveDirection)) {
 							rc.move(moveDirection);
@@ -126,7 +131,7 @@ public class RobotPlayer {
 		{
 			try
 			{
-				broadcastEnemyPastrs(rc);
+				broadcastEnemyPastrLocations(rc);
 				spawnRobot(rc);
 				rc.yield();
 			}
@@ -147,14 +152,16 @@ public class RobotPlayer {
 		}
 	}
 
-	private static void broadcastEnemyPastrs(RobotController rc)
+	private static void broadcastEnemyPastrLocations(RobotController rc)
 			throws GameActionException {
 		MapLocation[] enemyPastrLocation = rc.sensePastrLocations(rc.getTeam().opponent());
 		int count = 0;
 		for (; count < enemyPastrLocation.length; count++)
 		{
 			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count, enemyPastrLocation[count].x);
-			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count + 1, enemyPastrLocation[count].y);
+			//System.out.println("Broadcasting " + enemyPastrLocation[count].x + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count));
+			rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + count * 2 + 1, enemyPastrLocation[count].y);
+			//System.out.println("Broadcasting " + enemyPastrLocation[count].y + " on channel " + (ENEMY_PASTR_LOCATION_DATA_START + count + 1));
 		}
 		
 		rc.broadcast(ENEMY_PASTR_COUNT_INDEX, count);
