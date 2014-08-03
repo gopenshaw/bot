@@ -173,16 +173,17 @@ public class RobotPlayer {
 				movementStatus.distanceFromDestination = currentLocation.distanceSquaredTo(destination);
 				return movementStatus;
 			}
+
+			if (rc.canMove(movementStatus.currentDirection))
+			{
+				rc.move(movementStatus.currentDirection);
+			}
 			else
 			{
-				if (rc.canMove(movementStatus.currentDirection))
-				{
-					rc.move(movementStatus.currentDirection);
-				}
+				//--We put the wall on our side
+				movementStatus.currentDirection = getNavigableDirection(rc, movementStatus);
 			}
 			
-			//--We put the wall on our side
-			movementStatus.currentDirection = getNavigableDirection(rc, movementStatus);
 			movementStatus.followingWall = true;
 			movementStatus.distanceFromDestination = DISTANCE_NOT_SET_VALUE;
 			return movementStatus;
