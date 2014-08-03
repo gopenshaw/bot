@@ -154,25 +154,16 @@ public class RobotPlayer {
 		rc.setIndicatorString(0, "Was not able to move. About to rotate...");
 		
 		//--We put the wall on our right
-				while (!rc.canMove(moveDirection))
-				{
-					moveDirection = moveDirection.rotateLeft();
-				}
-				
-				rc.setIndicatorString(0, "Returning direction " + moveDirection.toString());
-				
-				//--and return the distance for future comparison
-				int distanceToEnemyPastr = currentLocation.distanceSquaredTo(enemyPastr);
-				return new MovementStatus(moveDirection, true, distanceToEnemyPastr);
+		while (!rc.canMove(moveDirection))
+		{
+			moveDirection = moveDirection.rotateLeft();
+		}
 		
-//		//--We put the wall on our right
-//		while (!rc.canMove(moveDirection))
-//		{
-//			moveDirection = moveDirection.rotateLeft();
-//		}
-//		//--and return the distance for future comparison
-//		int distanceToEnemyPastr = currentLocation.distanceSquaredTo(enemyPastr);
-//		return new MovementStatus(moveDirection, true, distanceToEnemyPastr);
+		rc.setIndicatorString(0, "Returning direction " + moveDirection.toString());
+		
+		//--and return the distance for future comparison
+		int distanceToEnemyPastr = currentLocation.distanceSquaredTo(enemyPastr);
+		return new MovementStatus(moveDirection, true, distanceToEnemyPastr);
 	}
 
 	private static MovementStatus followWallToEnemyPastr(
@@ -190,52 +181,28 @@ public class RobotPlayer {
 		
 		
 		//--We either have the wall on our right
-				//or we have just passed a corner
-				Direction checkDirection = currentDirection.rotateRight().rotateRight();
-				if (rc.canMove(checkDirection))
-				{
-					rc.move(checkDirection);
-					return new MovementStatus(checkDirection, false, currentLocation.distanceSquaredTo(enemyPastr));
-				}
-				else
-				{
-					if (rc.canMove(currentDirection))
-					{
-						rc.move(currentDirection);
-					}
-				}
-				
-				//--We put the wall on our right
-				while (!rc.canMove(currentDirection))
-				{
-					currentDirection = currentDirection.rotateLeft();
-				}
-				//--and return the distance for future comparison
-				return new MovementStatus(currentDirection, false, currentLocation.distanceSquaredTo(enemyPastr));
+		//or we have just passed a corner
+		Direction checkDirection = currentDirection.rotateRight().rotateRight();
+		if (rc.canMove(checkDirection))
+		{
+			rc.move(checkDirection);
+			return new MovementStatus(checkDirection, false, currentLocation.distanceSquaredTo(enemyPastr));
+		}
+		else
+		{
+			if (rc.canMove(currentDirection))
+			{
+				rc.move(currentDirection);
+			}
+		}
 		
-//		//--We either have the wall on our right
-//		//or we have just passed a corner
-//		Direction checkDirection = currentDirection.rotateRight().rotateRight();
-//		if (rc.canMove(checkDirection))
-//		{
-//			rc.move(checkDirection);
-//			return currentLocation.distanceSquaredTo(enemyPastr);
-//		}
-//		else
-//		{
-//			if (rc.canMove(currentDirection))
-//			{
-//				rc.move(currentDirection);
-//			}
-//		}
-//		
-//		//--We put the wall on our right
-//		while (!rc.canMove(currentDirection))
-//		{
-//			currentDirection = currentDirection.rotateLeft();
-//		}
-//		//--and return the distance for future comparison
-//		return currentLocation.distanceSquaredTo(enemyPastr);
+		//--We put the wall on our right
+		while (!rc.canMove(currentDirection))
+		{
+			currentDirection = currentDirection.rotateLeft();
+		}
+		//--and return the distance for future comparison
+		return new MovementStatus(currentDirection, false, currentLocation.distanceSquaredTo(enemyPastr));
 	}
 
 	private static void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
