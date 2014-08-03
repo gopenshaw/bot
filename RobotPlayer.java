@@ -11,11 +11,9 @@ public class RobotPlayer {
 		boolean followingWall;
 		int distanceFromDestination;
 		boolean turningRight;
-		int robotID;
 		
 		MovementStatus(int robotID)
 		{
-			this.robotID = robotID;
 			this.turningRight = robotID % 2 == 0;
 		};
 	}
@@ -89,7 +87,7 @@ public class RobotPlayer {
 					}
 					else if (enemyPastrCount > 0)
 					{
-						int pastrIndexToAttack = movementStatus.robotID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
+						int pastrIndexToAttack = robotID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
 						MapLocation enemyPastr = 
 								new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
 												rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
