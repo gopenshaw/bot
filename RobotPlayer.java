@@ -146,17 +146,7 @@ public class RobotPlayer {
 			}
 			
 			//--We were not able to move, so we put the wall on our right/left
-			while (!rc.canMove(moveDirection))
-			{
-				if (movementStatus.turningRight)
-				{
-					moveDirection = moveDirection.rotateRight();
-				}
-				else
-				{
-					moveDirection = moveDirection.rotateLeft();
-				}
-			}
+			movementStatus.currentDirection = getNavigableDirection(rc, movementStatus);
 			
 			int distanceToEnemyPastr = currentLocation.distanceSquaredTo(enemyPastr);
 			movementStatus.currentDirection = moveDirection;
@@ -194,17 +184,7 @@ public class RobotPlayer {
 			}
 			
 			//--We put the wall on our side
-			while (!rc.canMove(movementStatus.currentDirection))
-			{
-				if (movementStatus.turningRight)
-				{
-					movementStatus.currentDirection = movementStatus.currentDirection.rotateRight();
-				}
-				else
-				{
-					movementStatus.currentDirection = movementStatus.currentDirection.rotateLeft();
-				}
-			}
+			movementStatus.currentDirection = getNavigableDirection(rc, movementStatus);
 			
 			movementStatus.followingWall = true;
 			movementStatus.distanceFromDestination = DISTANCE_NOT_SET_VALUE;
@@ -243,7 +223,26 @@ public class RobotPlayer {
 		}
 	}
 	
-	public static void runHq(RobotController rc)
+	private static Direction getNavigableDirection(
+			RobotController rc, MovementStatus movementStatus)
+	{
+		Direction navigableDirection = movementStatus.currentDirection;
+		while (!rc.canMove(movementStatus.currentDirection))
+		{
+			if (movementStatus.turningRight)
+			{
+				navigableDirection = navigableDirection.rotateRight();
+			}
+			else
+			{
+				navigableDirection = navigableDirection.rotateLeft();
+			}
+		}
+		
+		return navigableDirection;
+	}
+	
+	private static void runHq(RobotController rc)
 	{
 		while (true)
 		{
