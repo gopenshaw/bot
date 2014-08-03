@@ -91,7 +91,7 @@ public class RobotPlayer {
 						MapLocation enemyPastr = 
 								new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
 												rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
-						movementStatus = goToDestination(rc, movementStatus, enemyPastr);
+						movementStatus = goToDestination(enemyPastr, rc, movementStatus);
 						
 						if (movementStatus.followingWall
 							&& movementStatus.distanceFromDestination < closestDistance)
@@ -126,7 +126,7 @@ public class RobotPlayer {
 	}
 	
 	private static MovementStatus goToDestination(
-			RobotController rc, MovementStatus movementStatus, MapLocation destination) 
+			MapLocation destination, RobotController rc, MovementStatus movementStatus) 
 			throws GameActionException 
 	{
 		MapLocation currentLocation = rc.getLocation();
