@@ -159,10 +159,17 @@ public class RobotPlayer {
 		
 		rc.setIndicatorString(0, "Was not able to move. About to rotate...");
 		
-		//--We put the wall on our right
+		//--We put the wall on our right or left
 		while (!rc.canMove(moveDirection))
 		{
-			moveDirection = moveDirection.rotateLeft();
+			if (movementStatus.turningRight)
+			{
+				moveDirection = moveDirection.rotateRight();
+			}
+			else
+			{
+				moveDirection = moveDirection.rotateLeft();
+			}
 		}
 		
 		rc.setIndicatorString(0, "Returning direction " + moveDirection.toString());
@@ -189,9 +196,18 @@ public class RobotPlayer {
 		rc.setIndicatorString(1, "" + enemyPastr.x + " " + enemyPastr.y);
 		
 		
-		//--We either have the wall on our right
+		//--We either have the wall on our left/right
 		//or we have just passed a corner
-		Direction checkDirection = movementStatus.currentDirection.rotateRight().rotateRight();
+		Direction checkDirection;
+		if (movementStatus.turningRight)
+		{
+			checkDirection = movementStatus.currentDirection.rotateLeft().rotateLeft();
+		}
+		else
+		{
+			checkDirection = movementStatus.currentDirection.rotateRight().rotateRight();
+		}
+		
 		if (rc.canMove(checkDirection))
 		{
 			rc.move(checkDirection);
@@ -208,10 +224,17 @@ public class RobotPlayer {
 			}
 		}
 		
-		//--We put the wall on our right
+		//--We put the wall on our side
 		while (!rc.canMove(movementStatus.currentDirection))
 		{
-			movementStatus.currentDirection = movementStatus.currentDirection.rotateLeft();
+			if (movementStatus.turningRight)
+			{
+				movementStatus.currentDirection = movementStatus.currentDirection.rotateRight();
+			}
+			else
+			{
+				movementStatus.currentDirection = movementStatus.currentDirection.rotateLeft();
+			}
 		}
 		//--and return the distance for future comparison
 		movementStatus.encounteredObstacle = false;
