@@ -89,7 +89,11 @@ public class RobotPlayer {
 					}
 					else if (enemyPastrCount > 0)
 					{
-						movementStatus = goToAnEnemyPastr(rc, movementStatus);
+						int pastrIndexToAttack = movementStatus.robotID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
+						MapLocation enemyPastr = 
+								new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
+												rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
+						movementStatus = goToDestination(rc, movementStatus, enemyPastr);
 						
 						if (movementStatus.followingWall
 							&& movementStatus.distanceFromDestination < closestDistance)
@@ -123,19 +127,14 @@ public class RobotPlayer {
 		}
 	}
 	
-	private static MovementStatus goToAnEnemyPastr(RobotController rc, MovementStatus movementStatus) 
+	private static MovementStatus goToDestination(
+			RobotController rc, MovementStatus movementStatus, MapLocation destination) 
 			throws GameActionException 
 	{
-		int pastrIndexToAttack = movementStatus.robotID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
-		
 		MapLocation currentLocation = rc.getLocation();
-		MapLocation enemyPastr = 
-				new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
-								rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
-		
 		if (!movementStatus.followingWall)
 		{
-			Direction moveDirection = currentLocation.directionTo(enemyPastr);
+			Direction moveDirection = currentLocation.directionTo(destination);
 			movementStatus.currentDirection = moveDirection;
 			
 			if (rc.canMove(moveDirection))
@@ -148,7 +147,7 @@ public class RobotPlayer {
 			//--We were not able to move, so we put the wall on our right/left
 			movementStatus.currentDirection = getNavigableDirection(rc, movementStatus);
 			
-			int distanceToEnemyPastr = currentLocation.distanceSquaredTo(enemyPastr);
+			int distanceToEnemyPastr = currentLocation.distanceSquaredTo(destination);
 			movementStatus.followingWall = true;
 			movementStatus.distanceFromDestination = distanceToEnemyPastr;
 			return movementStatus;
@@ -171,7 +170,7 @@ public class RobotPlayer {
 				rc.move(checkDirection);
 				movementStatus.followingWall = false;
 				movementStatus.currentDirection = checkDirection;
-				movementStatus.distanceFromDestination = currentLocation.distanceSquaredTo(enemyPastr);
+				movementStatus.distanceFromDestination = currentLocation.distanceSquaredTo(destination);
 				return movementStatus;
 			}
 			else
