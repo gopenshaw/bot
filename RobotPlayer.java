@@ -136,11 +136,11 @@ public class RobotPlayer {
 		if (!movementStatus.followingWall)
 		{
 			Direction moveDirection = currentLocation.directionTo(enemyPastr);
+			movementStatus.currentDirection = moveDirection;
 			
 			if (rc.canMove(moveDirection))
 			{
 				rc.move(moveDirection);
-				movementStatus.currentDirection = moveDirection;
 				movementStatus.distanceFromDestination = DISTANCE_NOT_SET_VALUE;
 				return movementStatus;
 			}
@@ -149,7 +149,6 @@ public class RobotPlayer {
 			movementStatus.currentDirection = getNavigableDirection(rc, movementStatus);
 			
 			int distanceToEnemyPastr = currentLocation.distanceSquaredTo(enemyPastr);
-			movementStatus.currentDirection = moveDirection;
 			movementStatus.followingWall = true;
 			movementStatus.distanceFromDestination = distanceToEnemyPastr;
 			return movementStatus;
@@ -185,7 +184,6 @@ public class RobotPlayer {
 			
 			//--We put the wall on our side
 			movementStatus.currentDirection = getNavigableDirection(rc, movementStatus);
-			
 			movementStatus.followingWall = true;
 			movementStatus.distanceFromDestination = DISTANCE_NOT_SET_VALUE;
 			return movementStatus;
@@ -227,7 +225,7 @@ public class RobotPlayer {
 			RobotController rc, MovementStatus movementStatus)
 	{
 		Direction navigableDirection = movementStatus.currentDirection;
-		while (!rc.canMove(movementStatus.currentDirection))
+		while (!rc.canMove(navigableDirection))
 		{
 			if (movementStatus.turningRight)
 			{
