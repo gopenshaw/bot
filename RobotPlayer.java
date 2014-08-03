@@ -8,8 +8,8 @@ public class RobotPlayer {
 	static class MovementStatus
 	{
 		Direction currentDirection;
-		boolean encounteredObstacle;
-		int distance;
+		boolean followingWall;
+		int distanceFromDestination;
 		boolean turningRight;
 		int robotID;
 		
@@ -18,13 +18,6 @@ public class RobotPlayer {
 			this.robotID = robotID;
 			this.turningRight = robotID % 2 == 0;
 		};
-		
-		MovementStatus(Direction currentDirection, boolean encounteredObstacle, int distance)
-		{
-			this.currentDirection = currentDirection;
-			this.encounteredObstacle = encounteredObstacle;
-			this.distance = distance;
-		}
 	}
 	
 	final static Direction[] directions = 
@@ -50,7 +43,7 @@ public class RobotPlayer {
 	final static int SELF_DESTRUCT_WALK_STEPS = 3;
 	
 	//--Navigation
-	final static int DISTANCE_NOT_SET_VALUE = -1;
+	final static int DISTANCE_NOT_SET_VALUE = Integer.MAX_VALUE;
 	
 	static Random rand;
 	
@@ -74,7 +67,6 @@ public class RobotPlayer {
 		
 		MovementStatus movementStatus = new MovementStatus(robotID);
 		int closestDistance = Integer.MAX_VALUE;
-		boolean followingWall = false;
 		
 		while (true)
 		{
@@ -95,23 +87,20 @@ public class RobotPlayer {
 					{
 						attackAnEnemy(rc, nearbyEnemies);
 					}
-					else if (!followingWall && 
-							enemyPastrCount > 0)
+					else if (enemyPastrCount > 0)
 					{
 						movementStatus = goToAnEnemyPastr(rc, movementStatus);
-						if (movementStatus.encounteredObstacle)
+						
+						if (movementStatus.followingWall
+							&& movementStatus.distanceFromDestination < closestDistance)
 						{
-							closestDistance = movementStatus.distance;
-							followingWall = true;
+							closestDistance = movementStatus.distanceFromDestination;
 						}
-					}
-					else if (followingWall
-							&& enemyPastrCount > 0)
-					{
-						movementStatus = followWallToEnemyPastr(rc, movementStatus);
-						if (movementStatus.distance < closestDistance)
+						
+						if (!movementStatus.followingWall
+							&& movementStatus.distanceFromDestination >= closestDistance)
 						{
-							followingWall = false;
+							movementStatus.followingWall = true;
 						}
 					}
 					else
@@ -138,108 +127,89 @@ public class RobotPlayer {
 			throws GameActionException 
 	{
 		int pastrIndexToAttack = movementStatus.robotID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
-		rc.setIndicatorString(0, "Moving toward enemy PASTR " + pastrIndexToAttack);
 		
 		MapLocation currentLocation = rc.getLocation();
 		MapLocation enemyPastr = 
 				new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
 								rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
 		
-		rc.setIndicatorString(1, "" + enemyPastr.x + " " + enemyPastr.y);
-		Direction moveDirection = currentLocation.directionTo(enemyPastr);
-		
-		if (rc.canMove(moveDirection))
+		if (!movementStatus.followingWall)
 		{
-			rc.move(moveDirection);
+			Direction moveDirection = currentLocation.directionTo(enemyPastr);
+			
+			if (rc.canMove(moveDirection))
+			{
+				rc.move(moveDirection);
+				movementStatus.currentDirection = moveDirection;
+				movementStatus.distanceFromDestination = DISTANCE_NOT_SET_VALUE;
+				return movementStatus;
+			}
+			
+			//--We were not able to move, so we put the wall on our right/left
+			while (!rc.canMove(moveDirection))
+			{
+				if (movementStatus.turningRight)
+				{
+					moveDirection = moveDirection.rotateRight();
+				}
+				else
+				{
+					moveDirection = moveDirection.rotateLeft();
+				}
+			}
+			
+			int distanceToEnemyPastr = currentLocation.distanceSquaredTo(enemyPastr);
 			movementStatus.currentDirection = moveDirection;
-			movementStatus.encounteredObstacle = false;
-			movementStatus.distance = DISTANCE_NOT_SET_VALUE;
+			movementStatus.followingWall = true;
+			movementStatus.distanceFromDestination = distanceToEnemyPastr;
 			return movementStatus;
 		}
-		
-		rc.setIndicatorString(0, "Was not able to move. About to rotate...");
-		
-		//--We put the wall on our right or left
-		while (!rc.canMove(moveDirection))
+		//--We are following a wall
+		else
 		{
+			Direction checkDirection;
 			if (movementStatus.turningRight)
 			{
-				moveDirection = moveDirection.rotateRight();
+				checkDirection = movementStatus.currentDirection.rotateLeft().rotateLeft();
 			}
 			else
 			{
-				moveDirection = moveDirection.rotateLeft();
+				checkDirection = movementStatus.currentDirection.rotateRight().rotateRight();
 			}
-		}
-		
-		rc.setIndicatorString(0, "Returning direction " + moveDirection.toString());
-		
-		//--and return the distance for future comparison
-		int distanceToEnemyPastr = currentLocation.distanceSquaredTo(enemyPastr);
-		movementStatus.currentDirection = moveDirection;
-		movementStatus.encounteredObstacle = true;
-		movementStatus.distance = distanceToEnemyPastr;
-		return movementStatus;
-	}
-
-	private static MovementStatus followWallToEnemyPastr(
-			RobotController rc, MovementStatus movementStatus) throws GameActionException 
-	{
-		int pastrIndexToAttack = movementStatus.robotID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
-		rc.setIndicatorString(0, "Following wall toward enemy PASTR " + pastrIndexToAttack);
-		
-		MapLocation currentLocation = rc.getLocation();
-		MapLocation enemyPastr = 
-				new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
-								rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
-		
-		rc.setIndicatorString(1, "" + enemyPastr.x + " " + enemyPastr.y);
-		
-		
-		//--We either have the wall on our left/right
-		//or we have just passed a corner
-		Direction checkDirection;
-		if (movementStatus.turningRight)
-		{
-			checkDirection = movementStatus.currentDirection.rotateLeft().rotateLeft();
-		}
-		else
-		{
-			checkDirection = movementStatus.currentDirection.rotateRight().rotateRight();
-		}
-		
-		if (rc.canMove(checkDirection))
-		{
-			rc.move(checkDirection);
-			movementStatus.currentDirection = checkDirection;
-			movementStatus.encounteredObstacle = false;
-			movementStatus.distance = currentLocation.distanceSquaredTo(enemyPastr);
-			return movementStatus;
-		}
-		else
-		{
-			if (rc.canMove(movementStatus.currentDirection))
+			
+			if (rc.canMove(checkDirection))
 			{
-				rc.move(movementStatus.currentDirection);
-			}
-		}
-		
-		//--We put the wall on our side
-		while (!rc.canMove(movementStatus.currentDirection))
-		{
-			if (movementStatus.turningRight)
-			{
-				movementStatus.currentDirection = movementStatus.currentDirection.rotateRight();
+				rc.move(checkDirection);
+				movementStatus.followingWall = false;
+				movementStatus.currentDirection = checkDirection;
+				movementStatus.distanceFromDestination = currentLocation.distanceSquaredTo(enemyPastr);
+				return movementStatus;
 			}
 			else
 			{
-				movementStatus.currentDirection = movementStatus.currentDirection.rotateLeft();
+				if (rc.canMove(movementStatus.currentDirection))
+				{
+					rc.move(movementStatus.currentDirection);
+				}
 			}
+			
+			//--We put the wall on our side
+			while (!rc.canMove(movementStatus.currentDirection))
+			{
+				if (movementStatus.turningRight)
+				{
+					movementStatus.currentDirection = movementStatus.currentDirection.rotateRight();
+				}
+				else
+				{
+					movementStatus.currentDirection = movementStatus.currentDirection.rotateLeft();
+				}
+			}
+			
+			movementStatus.followingWall = true;
+			movementStatus.distanceFromDestination = DISTANCE_NOT_SET_VALUE;
+			return movementStatus;
 		}
-		//--and return the distance for future comparison
-		movementStatus.encounteredObstacle = false;
-		movementStatus.distance = currentLocation.distanceSquaredTo(enemyPastr);
-		return movementStatus;
 	}
 
 	private static void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
