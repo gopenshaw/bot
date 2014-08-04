@@ -244,8 +244,8 @@ public class RobotPlayer {
 		{
 			try
 			{
-				broadcastEnemyPastrLocations(rc);
 				spawnRobot(rc);
+				broadcastEnemyPastrLocations(rc);
 				rc.yield();
 			}
 			catch (Exception e)
