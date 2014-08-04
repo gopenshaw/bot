@@ -31,7 +31,7 @@ public class Soldier {
 					Robot[] nearbyEnemies = 
 							rc.senseNearbyGameObjects(Robot.class, 10, rc.getTeam().opponent());
 					
-					int enemyPastrCount = rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
+					int enemyPastrCount = Communication.getEnemyPastrCount(rc);
 					
 					if (nearbyEnemies.length >= SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD
 						&& rc.getHealth() < SELF_DESTRUCT_HEALTH_THRESHOLD)
@@ -44,12 +44,8 @@ public class Soldier {
 					}
 					else if (enemyPastrCount > 0)
 					{
-						int pastrIndexToAttack = robotID % rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
-						MapLocation enemyPastr = 
-								new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2),
-												rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + pastrIndexToAttack * 2 + 1));
-						
-			
+						int pastrIndexToAttack = robotID % enemyPastrCount;
+						MapLocation enemyPastr = Communication.getEnemyPastrLocation(pastrIndexToAttack, rc);
 						movementStatus = goToDestination(enemyPastr, rc, movementStatus);
 					}
 					else
