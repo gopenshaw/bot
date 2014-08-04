@@ -94,15 +94,7 @@ public class Soldier {
 			MapLocation destination, RobotController rc, MovementInfo movementStatus) 
 			throws GameActionException {
 		
-		Direction checkDirection;
-		if (movementStatus.turningRight)
-		{
-			checkDirection = movementStatus.currentDirection.rotateLeft().rotateLeft();
-		}
-		else
-		{
-			checkDirection = movementStatus.currentDirection.rotateRight().rotateRight();
-		}
+		Direction checkDirection = getDirectionToCheck(movementStatus);
 		
 		if (rc.canMove(checkDirection))
 		{
@@ -125,6 +117,15 @@ public class Soldier {
 		}
 		
 		return movementStatus;
+	}
+	
+	private static Direction getDirectionToCheck(MovementInfo movementStatus) {
+		if (movementStatus.turningRight)
+		{
+			return movementStatus.currentDirection.rotateLeft().rotateLeft();
+		}
+		
+		return movementStatus.currentDirection.rotateRight().rotateRight();
 	}
 	
 	private static void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
