@@ -82,6 +82,7 @@ public class Soldier {
 		else
 		{
 			movementStatus.followingWall = true;
+			movementStatus.distance = currentLocation.distanceSquaredTo(destination);
 			movementStatus.currentDirection = getNavigableDirection(rc, movementStatus);
 			rc.move(movementStatus.currentDirection);
 		}
@@ -106,6 +107,10 @@ public class Soldier {
 		if (rc.canMove(checkDirection))
 		{
 			movementStatus.currentDirection = checkDirection;
+			int currentDistance = rc.getLocation().distanceSquaredTo(destination);
+			if (currentDistance < movementStatus.distance) {
+				movementStatus.followingWall = false;
+			}
 		}
 		
 		if (rc.canMove(movementStatus.currentDirection))
