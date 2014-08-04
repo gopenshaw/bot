@@ -7,7 +7,6 @@ import battlecode.common.Robot;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import bot.RobotPlayer.MovementStatus;
 
 public class Soldier {
 	
@@ -21,7 +20,7 @@ public class Soldier {
 		int robotID = rc.getRobot().getID();
 		rc.setIndicatorString(2, "" + robotID);
 		
-		MovementStatus movementStatus = new MovementStatus(robotID);
+		MovementInfo movementStatus = new MovementInfo(robotID);
 		
 		while (true)
 		{
@@ -63,8 +62,8 @@ public class Soldier {
 		}
 	}
 	
-	private static MovementStatus goToDestination(
-			MapLocation destination, RobotController rc, MovementStatus movementStatus) 
+	private static MovementInfo goToDestination(
+			MapLocation destination, RobotController rc, MovementInfo movementStatus) 
 			throws GameActionException 
 	{
 		if (movementStatus.followingWall) {
@@ -90,8 +89,8 @@ public class Soldier {
 		return movementStatus;
 	}
 
-	private static MovementStatus followWall(
-			MapLocation destination, RobotController rc, MovementStatus movementStatus) 
+	private static MovementInfo followWall(
+			MapLocation destination, RobotController rc, MovementInfo movementStatus) 
 			throws GameActionException {
 		
 		Direction checkDirection;
@@ -155,7 +154,7 @@ public class Soldier {
 	}
 	
 	private static Direction getNavigableDirection(
-			RobotController rc, MovementStatus movementStatus)
+			RobotController rc, MovementInfo movementStatus)
 	{
 		Direction navigableDirection = movementStatus.currentDirection;
 		while (!rc.canMove(navigableDirection))

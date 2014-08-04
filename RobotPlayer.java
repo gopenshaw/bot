@@ -5,30 +5,6 @@ import battlecode.common.*;
 import java.util.*;
 
 public class RobotPlayer {
-	static class MovementStatus
-	{
-		Direction currentDirection;
-		boolean followingWall;
-		boolean turningRight;
-		
-		MovementStatus(int robotID)
-		{
-			this.turningRight = robotID % 2 == 0;
-		};
-	}
-	
-	final static Direction[] directions = 
-	{
-		Direction.NORTH, 
-		Direction.NORTH_EAST, 
-		Direction.EAST, 
-		Direction.SOUTH_EAST, 
-		Direction.SOUTH, 
-		Direction.SOUTH_WEST, 
-		Direction.WEST, 
-		Direction.NORTH_WEST
-	};
-	
 	static Random rand;
 	
 	public static void run(RobotController rc) {
