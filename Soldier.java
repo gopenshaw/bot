@@ -67,31 +67,13 @@ public class Soldier {
 			MapLocation destination, RobotController rc, MovementStatus movementStatus) 
 			throws GameActionException 
 	{
+		if (movementStatus.followingWall) {
+			return followWall(destination, rc, movementStatus);
+		}
+		
 		//--check boolean and set direction
 		MapLocation currentLocation = rc.getLocation();
-		
-		if (!movementStatus.followingWall)
-		{
-			movementStatus.currentDirection = currentLocation.directionTo(destination);
-		}
-		else
-		{
-			//--get check direction
-			Direction checkDirection;
-			if (movementStatus.turningRight)
-			{
-				checkDirection = movementStatus.currentDirection.rotateLeft().rotateLeft();
-			}
-			else
-			{
-				checkDirection = movementStatus.currentDirection.rotateRight().rotateRight();
-			}
-			
-			if (rc.canMove(checkDirection))
-			{
-				movementStatus.currentDirection = checkDirection;
-			}
-		}
+		movementStatus.currentDirection = currentLocation.directionTo(destination);
 		
 		//--move
 		if (rc.canMove(movementStatus.currentDirection))
@@ -108,6 +90,39 @@ public class Soldier {
 		return movementStatus;
 	}
 
+	private static MovementStatus followWall(
+			MapLocation destination, RobotController rc, MovementStatus movementStatus) 
+			throws GameActionException {
+		
+		Direction checkDirection;
+		if (movementStatus.turningRight)
+		{
+			checkDirection = movementStatus.currentDirection.rotateLeft().rotateLeft();
+		}
+		else
+		{
+			checkDirection = movementStatus.currentDirection.rotateRight().rotateRight();
+		}
+		
+		if (rc.canMove(checkDirection))
+		{
+			movementStatus.currentDirection = checkDirection;
+		}
+		
+		if (rc.canMove(movementStatus.currentDirection))
+		{
+			rc.move(movementStatus.currentDirection);
+		}
+		else
+		{
+			movementStatus.followingWall = true;
+			movementStatus.currentDirection = getNavigableDirection(rc, movementStatus);
+			rc.move(movementStatus.currentDirection);
+		}
+		
+		return movementStatus;
+	}
+	
 	private static void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
 			throws GameActionException {
 		rc.setIndicatorString(0, "Attacking an enemy");
