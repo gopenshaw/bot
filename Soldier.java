@@ -42,7 +42,7 @@ public class Soldier {
 					else 
 					{
 						MapLocation destination = Communication.getDestination(rc);
-						movementStatus = goToDestination(destination, rc, movementStatus);
+						goToDestination(destination, rc, movementStatus);
 					}
 					
 					rc.yield();
@@ -64,15 +64,13 @@ public class Soldier {
 	
 	//--TODO: A robot needs to leave behind 'waypoints' to indicate that the path
 	//has shortcuts. Other robots will follow these 'waypoints' if they exist
-	
-	//--TODO: Does this method and the 'followWall' method need to return a MovementInfo
-	//object??
-	private static MovementInfo goToDestination(
+	private static void goToDestination(
 			MapLocation destination, RobotController rc, MovementInfo movementStatus) 
 			throws GameActionException 
 	{
 		if (movementStatus.followingWall) {
-			return followWall(destination, rc, movementStatus);
+			followWall(destination, rc, movementStatus);
+			return;
 		}
 		
 		//--check boolean and set direction
@@ -92,10 +90,10 @@ public class Soldier {
 			rc.move(movementStatus.currentDirection);
 		}
 		
-		return movementStatus;
+		return;
 	}
 
-	private static MovementInfo followWall(
+	private static void followWall(
 			MapLocation destination, RobotController rc, MovementInfo movementStatus) 
 			throws GameActionException {
 		
@@ -107,7 +105,7 @@ public class Soldier {
 			int currentDistance = rc.getLocation().distanceSquaredTo(destination);
 			if (currentDistance < movementStatus.distance) {
 				movementStatus.followingWall = false;
-				return movementStatus;
+				return;
 			}
 		}
 		
@@ -122,7 +120,7 @@ public class Soldier {
 			rc.move(movementStatus.currentDirection);
 		}
 		
-		return movementStatus;
+		return;
 	}
 	
 	private static Direction getDirectionToCheck(MovementInfo movementStatus) {
