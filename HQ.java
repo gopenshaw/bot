@@ -8,12 +8,24 @@ import battlecode.common.RobotController;
 public class HQ {
 	protected static void run(RobotController rc)
 	{
+		MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
+		
 		while (true)
 		{
 			try
 			{
 				spawnRobot(rc);
-				broadcastEnemyPastrLocations(rc);
+				
+				MapLocation[] enemyPastrLocation = rc.sensePastrLocations(rc.getTeam().opponent());
+				if (enemyPastrLocation.length > 0)
+				{
+					Communication.broadcastDestination(enemyPastrLocation[0], rc);
+				}
+				else
+				{
+					Communication.broadcastDestination(center, rc);
+				}
+				
 				rc.yield();
 			}
 			catch (Exception e)
@@ -31,17 +43,5 @@ public class HQ {
 				rc.spawn(toEnemy);
 			}
 		}
-	}
-
-	private static void broadcastEnemyPastrLocations(RobotController rc)
-			throws GameActionException {
-		MapLocation[] enemyPastrLocation = rc.sensePastrLocations(rc.getTeam().opponent());
-		int count = 0;
-		for (; count < enemyPastrLocation.length; count++)
-		{
-			Communication.broadcastEnemyPastrLocations(count, enemyPastrLocation[count], rc);
-		}
-		
-		Communication.setEnemyPastrCount(count, rc);
 	}
 }
