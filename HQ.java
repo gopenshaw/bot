@@ -9,6 +9,7 @@ public class HQ {
 	protected static void run(RobotController rc)
 	{
 		MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
+		int previousPastrCount = 0;
 		
 		while (true)
 		{
@@ -16,13 +17,22 @@ public class HQ {
 			{
 				spawnRobot(rc);
 				
-				MapLocation[] enemyPastrLocation = rc.sensePastrLocations(rc.getTeam().opponent());
-				if (enemyPastrLocation.length > 0)
+				MapLocation[] enemyPastrLocations = rc.sensePastrLocations(rc.getTeam().opponent());
+				int enemyPastrCount = enemyPastrLocations.length;
+				boolean enemyPastrDestroyed = enemyPastrCount < previousPastrCount;
+				previousPastrCount = enemyPastrCount;
+				
+				if (enemyPastrCount > 0)
 				{
-					Communication.broadcastDestination(enemyPastrLocation[0], rc);
+					Communication.broadcastDestination(enemyPastrLocations[0], rc);
+				}
+				else if (enemyPastrDestroyed)
+				{
+					Communication.buildPastr(center, rc);
 				}
 				else
 				{
+					Communication.delayPastr(rc);
 					Communication.broadcastDestination(center, rc);
 				}
 				
