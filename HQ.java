@@ -35,6 +35,7 @@ public class HQ {
 		}
 	}
 
+	//--TODO: Must have more intelligent spawn location(s).
 	private static void spawnRobot(RobotController rc)
 			throws GameActionException {
 		if (rc.isActive() && rc.senseRobotCount() < 25) {
