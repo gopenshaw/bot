@@ -145,7 +145,7 @@ public class Soldier {
 	
 	private static void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
 			throws GameActionException {
-		rc.setIndicatorString(0, "Attacking an enemy");
+		rc.setIndicatorString(0, "Attacking an enemy. Enemy count is " + nearbyEnemies.length);
 		for (int i = 0; i < nearbyEnemies.length; i++)
 		{
 			RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[i]);
