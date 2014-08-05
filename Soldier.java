@@ -11,9 +11,9 @@ import battlecode.common.RobotType;
 public class Soldier {
 	
 	//--Soldier self destruct
-	final static int SELF_DESTRUCT_HEALTH_THRESHOLD = 35;
-	final static int SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD = 4;
-	final static int SELF_DESTRUCT_WALK_STEPS = 3;
+	final static int SELF_DESTRUCT_HEALTH_THRESHOLD = 38;
+	final static int SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD = 3;
+	final static int SELF_DESTRUCT_WALK_STEPS = 2;
 	
 	public static void run(RobotController rc)
 	{
@@ -156,8 +156,10 @@ public class Soldier {
 				rc.move(moveDirection);
 			}
 			
-			rc.selfDestruct();
+			rc.yield();
 		}
+		
+		rc.selfDestruct();
 	}
 	
 	private static Direction getNavigableDirection(
