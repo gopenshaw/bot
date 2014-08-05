@@ -14,6 +14,9 @@ public class Soldier {
 	final static int SELF_DESTRUCT_HEALTH_THRESHOLD = 38;
 	final static int SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD = 3;
 	final static int SELF_DESTRUCT_WALK_STEPS = 2;
+	final static int INVALID_COORDINATE = -1;
+	
+	private static MapLocation previousDestination = new MapLocation(INVALID_COORDINATE, INVALID_COORDINATE);
 	
 	public static void run(RobotController rc)
 	{
@@ -59,15 +62,23 @@ public class Soldier {
 	//if the distance to the destination from the corners of an obstacle are never
 	//shorter than the initial distance when the robot first hit the obstacle.
 	
-	//--TODO: A related problem is that if the destination changes while the robot
-	//if following a wall, it needs to adjust to the new distance somehow
-	
 	//--TODO: A robot needs to leave behind 'waypoints' to indicate that the path
 	//has shortcuts. Other robots will follow these 'waypoints' if they exist
 	private static void goToDestination(
 			MapLocation destination, RobotController rc, MovementInfo movementStatus) 
 			throws GameActionException 
 	{
+		boolean destinationIsNew = !previousDestination.equals(destination);
+		previousDestination = destination;
+		
+		//--If the robot was following a wall but there is a new destination,
+		//this will force the robot to recalculate its distance from the destination
+		//so it does not get stuck on a wall
+		if (destinationIsNew)
+		{
+			movementStatus.followingWall = false;
+		}
+		
 		if (movementStatus.followingWall) {
 			followWall(destination, rc, movementStatus);
 			return;
