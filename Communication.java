@@ -5,47 +5,36 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
 public class Communication {
-	final static int ENEMY_PASTR_COUNT_INDEX = 2;
-	final static int ENEMY_PASTR_LOCATION_DATA_START = 3;
-	final static int ENEMY_PASTR_LOCATION_DATA_SIZE = 20;
-	
-	final static int DESTINATION_DATA_START = 0;
-	final static int DESTINATION_DATA_SIZE = 2;
-	
-	//--TODO: use one channel to broadcast a location. The value can represent, x + 100y
-	protected static void broadcastEnemyPastrLocations(int index, MapLocation location, RobotController rc) 
-			throws GameActionException {
-		rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + index * 2, location.x);
-		rc.broadcast(ENEMY_PASTR_LOCATION_DATA_START + index * 2 + 1, location.y);
-	}
-	
-	protected static MapLocation getEnemyPastrLocation(int index, RobotController rc) 
-			throws GameActionException
-	{
-		return new MapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + index * 2),
-				rc.readBroadcast(ENEMY_PASTR_LOCATION_DATA_START + index * 2 + 1));
-	}
+	final static int ENEMY_PASTR_COUNT_CHANNEL = 1;
+	final static int SOLDIER_DESTINATION_CHANNEL = 0;
 	
 	protected static void setEnemyPastrCount(int count, RobotController rc) throws GameActionException
 	{
-		rc.broadcast(ENEMY_PASTR_COUNT_INDEX, count);
+		rc.broadcast(ENEMY_PASTR_COUNT_CHANNEL, count);
 	}
 	
 	protected static int getEnemyPastrCount(RobotController rc) throws GameActionException
 	{
-		return rc.readBroadcast(ENEMY_PASTR_COUNT_INDEX);
+		return rc.readBroadcast(ENEMY_PASTR_COUNT_CHANNEL);
 	}
 	
 	protected static void broadcastDestination(MapLocation location, RobotController rc) 
 			throws GameActionException {
-		rc.broadcast(DESTINATION_DATA_START, location.x);
-		rc.broadcast(DESTINATION_DATA_START + 1, location.y);
+		rc.broadcast(SOLDIER_DESTINATION_CHANNEL, encodeMapLocation(location));
 	}
 	
 	protected static MapLocation getDestination(RobotController rc) 
 			throws GameActionException
 	{
-		return new MapLocation(rc.readBroadcast(DESTINATION_DATA_START),
-				rc.readBroadcast(DESTINATION_DATA_START + 1));
+		return decodeMapLocation(rc.readBroadcast(SOLDIER_DESTINATION_CHANNEL));
+	}
+	
+	private static int encodeMapLocation(MapLocation location)
+	{
+		return location.x + 100 * location.y;
+	}
+	
+	private static MapLocation decodeMapLocation(int value) {
+		return new MapLocation(value % 100, value / 100);
 	}
 }
