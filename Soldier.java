@@ -102,6 +102,7 @@ public class Soldier {
 			int currentDistance = rc.getLocation().distanceSquaredTo(destination);
 			if (currentDistance < movementStatus.distance) {
 				movementStatus.followingWall = false;
+				return movementStatus;
 			}
 		}
 		
