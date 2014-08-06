@@ -8,7 +8,8 @@ import battlecode.common.RobotController;
 public class HQ {
 	protected static void run(RobotController rc)
 	{
-		MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
+		MapLocation center = new MapLocation(
+				rc.getMapWidth() / 2, rc.getMapHeight() / 2);
 		int previousPastrCount = 0;
 		
 		while (true)
@@ -17,7 +18,8 @@ public class HQ {
 			{
 				spawnRobot(rc);
 				
-				MapLocation[] enemyPastrLocations = rc.sensePastrLocations(rc.getTeam().opponent());
+				MapLocation[] enemyPastrLocations = 
+						rc.sensePastrLocations(rc.getTeam().opponent());
 				int enemyPastrCount = enemyPastrLocations.length;
 				boolean enemyPastrDestroyed = enemyPastrCount < previousPastrCount;
 				previousPastrCount = enemyPastrCount;
