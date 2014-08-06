@@ -11,12 +11,14 @@ public class Communication {
 	final static int BUILD_PASTR_CHANNEL = 2;
 	final static int DO_NOT_BUILD_PASTR_VALUE = -1;
 	
-	protected static void setEnemyPastrCount(int count, RobotController rc) throws GameActionException
+	protected static void setEnemyPastrCount(int count, RobotController rc) 
+			throws GameActionException
 	{
 		rc.broadcast(ENEMY_PASTR_COUNT_CHANNEL, count);
 	}
 	
-	protected static int getEnemyPastrCount(RobotController rc) throws GameActionException
+	protected static int getEnemyPastrCount(RobotController rc) 
+			throws GameActionException
 	{
 		return rc.readBroadcast(ENEMY_PASTR_COUNT_CHANNEL);
 	}
@@ -32,7 +34,8 @@ public class Communication {
 		return decodeMapLocation(rc.readBroadcast(SOLDIER_DESTINATION_CHANNEL));
 	}
 	
-	protected static void buildPastr(MapLocation location, RobotController rc) throws GameActionException
+	protected static void buildPastr(MapLocation location, RobotController rc) 
+			throws GameActionException
 	{
 		rc.broadcast(BUILD_PASTR_CHANNEL, encodeMapLocation(location));
 	}
@@ -42,7 +45,8 @@ public class Communication {
 		rc.broadcast(BUILD_PASTR_CHANNEL, DO_NOT_BUILD_PASTR_VALUE);
 	}
 	
-	protected static MapLocation getPastrLocation(RobotController rc) throws GameActionException
+	protected static MapLocation getPastrLocation(RobotController rc) 
+			throws GameActionException
 	{
 		int value = rc.readBroadcast(BUILD_PASTR_CHANNEL);
 		if (value == DO_NOT_BUILD_PASTR_VALUE)

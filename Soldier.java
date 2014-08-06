@@ -16,7 +16,8 @@ public class Soldier {
 	final static int SELF_DESTRUCT_WALK_STEPS = 2;
 	final static int INVALID_COORDINATE = -1;
 	
-	private static MapLocation previousDestination = new MapLocation(INVALID_COORDINATE, INVALID_COORDINATE);
+	private static MapLocation previousDestination = 
+			new MapLocation(INVALID_COORDINATE, INVALID_COORDINATE);
 	
 	public static void run(RobotController rc)
 	{
@@ -31,7 +32,8 @@ public class Soldier {
 				if (rc.isActive()) {
 					
 					Robot[] nearbyEnemies = 
-							rc.senseNearbyGameObjects(Robot.class, 10, rc.getTeam().opponent());
+							rc.senseNearbyGameObjects(
+									Robot.class, 10, rc.getTeam().opponent());
 					
 					if (nearbyEnemies.length >= SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD
 						&& rc.getHealth() < SELF_DESTRUCT_HEALTH_THRESHOLD)
