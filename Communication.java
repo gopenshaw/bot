@@ -5,11 +5,48 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
 public class Communication {
-	final static int ENEMY_PASTR_COUNT_CHANNEL = 1;
-	final static int SOLDIER_DESTINATION_CHANNEL = 0;
+	final static int ENEMY_PASTR_COUNT_CHANNEL = 10001;
+	final static int SOLDIER_DESTINATION_CHANNEL = 10002;
 	
-	final static int BUILD_PASTR_CHANNEL = 2;
+	final static int BUILD_PASTR_CHANNEL = 10003;
 	final static int DO_NOT_BUILD_PASTR_VALUE = -1;
+	
+	final static int DESTINATION_INDEX_LENGTH = 5;
+	final static int MAP_SIZE_OFFSET = 10000;
+	
+	private static int[] destinationIndex = new int[DESTINATION_INDEX_LENGTH];
+	
+	protected static void broadcastSegment(MapLocation destination,
+			MapLocation segmentBegin, 
+			MapLocation segmentEnd, 
+			RobotController rc) 
+			throws GameActionException
+	{
+		int offset = MAP_SIZE_OFFSET * getDestinationIndex(destination);
+		if (offset < 0)
+		{
+			return;
+		}
+		
+		rc.broadcast(offset + encodeMapLocation(segmentBegin),
+				offset + encodeMapLocation(segmentEnd));
+	}
+	
+	protected static MapLocation getSegment(MapLocation destination, 
+			MapLocation segmentBegin,
+			RobotController rc) 
+			throws GameActionException
+	{
+		int offset = MAP_SIZE_OFFSET * getDestinationIndex(destination);
+		
+		int value =  rc.readBroadcast(offset + encodeMapLocation(segmentBegin));
+		if (value == 0)
+		{
+			return null;
+		}
+		
+		return decodeMapLocation(value);
+	}
 	
 	protected static void setEnemyPastrCount(int count, RobotController rc) 
 			throws GameActionException
@@ -64,5 +101,24 @@ public class Communication {
 	
 	private static MapLocation decodeMapLocation(int value) {
 		return new MapLocation(value % 100, value / 100);
+	}
+	
+	private static int getDestinationIndex(MapLocation destination)
+	{
+		int value = encodeMapLocation(destination);
+		for (int i = 0; i < DESTINATION_INDEX_LENGTH; i++)
+		{
+			if (destinationIndex[i] == value)
+			{
+				return i;
+			}
+			else if (destinationIndex[i] == 0)
+			{
+				destinationIndex[i] = value;
+				return i;
+			}
+		}
+		
+		return -1;
 	}
 }
