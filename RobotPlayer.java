@@ -17,5 +17,12 @@ public class RobotPlayer {
 		{
 			HQ.run(rc);
 		}
+		else if (rc.getType() == RobotType.PASTR)
+		{
+			while(true)
+			{
+				
+			}
+		}
 	}
 }

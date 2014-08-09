@@ -14,11 +14,10 @@ public class Soldier {
 	final static int SELF_DESTRUCT_HEALTH_THRESHOLD = 38;
 	final static int SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD = 3;
 	final static int SELF_DESTRUCT_WALK_STEPS = 2;
-	final static int INVALID_COORDINATE = -1;
 	
 	public static void run(RobotController rc)
 	{
-		MovementLogic navigation = null;
+		MovementLogic navigation = new MovementLogic(new MapLocation(-1, -1), rc);
 		
 		while (true)
 		{
@@ -40,7 +39,9 @@ public class Soldier {
 					}
 					else if (ourPastr != null)
 					{
-						buildPastr(ourPastr, rc);
+						rc.setIndicatorString(1, "going to build pastr at " + ourPastr);
+						//--Assuming navigation is not null here
+						buildPastr(ourPastr, navigation, rc);
 					}
 					else
 					{
@@ -63,12 +64,21 @@ public class Soldier {
 		}
 	}
 	
-	private static void buildPastr(MapLocation location, RobotController rc) 
+	private static void buildPastr(
+			MapLocation location, MovementLogic navigation, RobotController rc) 
 			throws GameActionException
 	{
-		if (rc.getLocation() == location)
+		PastrConstructionStatus status = Communication.getPastrBuildingStatus(rc);
+		MapLocation currentLocation = rc.getLocation();
+		if (currentLocation.distanceSquaredTo(location) < 5
+			&& status == PastrConstructionStatus.NOT_SET)
 		{
 			rc.construct(RobotType.PASTR);
+			Communication.setPastrBuildingStatus(PastrConstructionStatus.BUILDING, rc);
+		}
+		else
+		{
+			navigation.moveToward(location, rc);
 		}
 	}
 	

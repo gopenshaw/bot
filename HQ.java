@@ -24,19 +24,22 @@ public class HQ {
 				boolean enemyPastrDestroyed = enemyPastrCount < previousPastrCount;
 				previousPastrCount = enemyPastrCount;
 				
-				if (enemyPastrCount > 0)
-				{
-					Communication.broadcastDestination(enemyPastrLocations[0], rc);
-				}
-				else if (enemyPastrDestroyed)
-				{
-					Communication.buildPastr(center, rc);
-				}
-				else
-				{
-					Communication.delayPastr(rc);
-					Communication.broadcastDestination(center, rc);
-				}
+				Communication.buildPastr(center, rc);
+				
+//				if (enemyPastrCount > 0)
+//				{
+//					Communication.broadcastDestination(enemyPastrLocations[0], rc);
+//				}
+//				else if (enemyPastrDestroyed)
+//				{
+//					rc.setIndicatorString(0, "build a pastr!");
+//					Communication.buildPastr(center, rc);
+//				}
+//				else
+//				{
+//					Communication.delayPastr(rc);
+//					Communication.broadcastDestination(center, rc);
+//				}
 				
 				rc.yield();
 			}
