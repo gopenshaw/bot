@@ -74,7 +74,7 @@ public class MovementLogic {
 		{
 			MapLocation currentLocation = rc.getLocation();
 			if (this.createWaypoint
-				&& this.segmentStart != currentLocation)
+				&& !this.segmentStart.equals(currentLocation))
 			{
 				Communication.broadcastSegment(
 						destination, this.segmentStart, currentLocation, rc);
