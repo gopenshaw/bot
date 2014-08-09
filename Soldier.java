@@ -25,6 +25,7 @@ public class Soldier {
 			try {
 				if (rc.isActive()) {
 					
+					MapLocation ourPastr = Communication.getPastrLocation(rc);
 					Robot[] nearbyEnemies = rc.senseNearbyGameObjects(
 							Robot.class, 10, rc.getTeam().opponent());
 					
@@ -36,6 +37,10 @@ public class Soldier {
 					else if (nearbyEnemies.length > 0)
 					{
 						attackAnEnemy(rc, nearbyEnemies);
+					}
+					else if (ourPastr != null)
+					{
+						buildPastr(ourPastr, rc);
 					}
 					else
 					{
@@ -55,6 +60,15 @@ public class Soldier {
 				System.out.println("Soldier Exception " + e.getMessage());
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	private static void buildPastr(MapLocation location, RobotController rc) 
+			throws GameActionException
+	{
+		if (rc.getLocation() == location)
+		{
+			rc.construct(RobotType.PASTR);
 		}
 	}
 	

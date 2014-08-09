@@ -1,15 +1,28 @@
 package bot;
 
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
 public class Communication {
+	
 	final static int ENEMY_PASTR_COUNT_CHANNEL = 10001;
 	final static int SOLDIER_DESTINATION_CHANNEL = 10002;
 	
-	final static int BUILD_PASTR_CHANNEL = 10003;
+	final static int BUILD_PASTR_COMMAND_CHANNEL = 10003;
+	final static int CURRENTLY_BUIDLING_PASTR_CHANNEL = 10004;
+	final static int PASTR_BUILDING_STATUS_CHANNEL = 10005;
 	final static int DO_NOT_BUILD_PASTR_VALUE = -1;
+	
+	protected static void setPastrBuildingStatus(
+			PastrConstructionStatus status, RobotController rc) throws GameActionException
+	{
+		rc.broadcast(PASTR_BUILDING_STATUS_CHANNEL, status.ordinal());
+	}
+	
+	protected static PastrConstructionStatus getPastrBuildingStatus(RobotController rc) 
+			throws GameActionException
+	{
+		return PastrConstructionStatus.values()[rc.readBroadcast(PASTR_BUILDING_STATUS_CHANNEL)];
+	}
 	
 	protected static void setEnemyPastrCount(int count, RobotController rc) 
 			throws GameActionException
@@ -37,18 +50,18 @@ public class Communication {
 	protected static void buildPastr(MapLocation location, RobotController rc) 
 			throws GameActionException
 	{
-		rc.broadcast(BUILD_PASTR_CHANNEL, encodeMapLocation(location));
+		rc.broadcast(BUILD_PASTR_COMMAND_CHANNEL, encodeMapLocation(location));
 	}
 	
 	protected static void delayPastr(RobotController rc) throws GameActionException
 	{
-		rc.broadcast(BUILD_PASTR_CHANNEL, DO_NOT_BUILD_PASTR_VALUE);
+		rc.broadcast(BUILD_PASTR_COMMAND_CHANNEL, DO_NOT_BUILD_PASTR_VALUE);
 	}
 	
 	protected static MapLocation getPastrLocation(RobotController rc) 
 			throws GameActionException
 	{
-		int value = rc.readBroadcast(BUILD_PASTR_CHANNEL);
+		int value = rc.readBroadcast(BUILD_PASTR_COMMAND_CHANNEL);
 		if (value == DO_NOT_BUILD_PASTR_VALUE)
 		{
 			return null;
