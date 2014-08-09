@@ -25,9 +25,8 @@ public class Soldier {
 			try {
 				if (rc.isActive()) {
 					
-					Robot[] nearbyEnemies = 
-							rc.senseNearbyGameObjects(
-									Robot.class, 10, rc.getTeam().opponent());
+					Robot[] nearbyEnemies = rc.senseNearbyGameObjects(
+							Robot.class, 10, rc.getTeam().opponent());
 					
 					if (nearbyEnemies.length >= SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD
 						&& rc.getHealth() < SELF_DESTRUCT_HEALTH_THRESHOLD)
@@ -38,7 +37,7 @@ public class Soldier {
 					{
 						attackAnEnemy(rc, nearbyEnemies);
 					}
-					else 
+					else
 					{
 						MapLocation destination = Communication.getDestination(rc);
 						if (navigation == null)
