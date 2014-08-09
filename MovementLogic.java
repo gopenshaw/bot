@@ -73,7 +73,8 @@ public class MovementLogic {
 				|| this.currentDirection == oldDirection.rotateRight().rotateRight())
 		{
 			MapLocation currentLocation = rc.getLocation();
-			if (this.createWaypoint)
+			if (this.createWaypoint
+				&& this.segmentStart != currentLocation)
 			{
 				Communication.broadcastSegment(
 						destination, this.segmentStart, currentLocation, rc);
