@@ -26,6 +26,7 @@ public class MovementLogic {
 	public void moveToward(MapLocation destination, RobotController rc) 
 			throws GameActionException
 	{
+		rc.setIndicatorString(2, "");
 		//--If the robot was following a wall but there is a new destination,
 		//this will force the robot to recalculate its distance from the destination
 		//so it does not get stuck on a wall
@@ -57,6 +58,7 @@ public class MovementLogic {
 			//--Since we made a left turn, at our next right turn we
 			//should make a waypoint
 			this.createWaypoint = true;
+			rc.setIndicatorString(2, "hit a wall");
 		}
 		
 		//--The robot is following the wall and
@@ -66,7 +68,9 @@ public class MovementLogic {
 				getNavigableDirection(rc, this.currentDirection.rotateRight().rotateRight());
 		rc.move(this.currentDirection);
 		
-		if (this.currentDirection.ordinal() > oldDirection.ordinal())
+		//--Did we turn to the right?
+		if (this.currentDirection == oldDirection.rotateRight()
+				|| this.currentDirection == oldDirection.rotateRight().rotateRight())
 		{
 			MapLocation currentLocation = rc.getLocation();
 			if (this.createWaypoint)
@@ -85,10 +89,12 @@ public class MovementLogic {
 				this.followingWall = false;
 			}
 		}
-		else if (this.currentDirection.ordinal() < oldDirection.ordinal())
+		//--Or did we turn left?
+		else if (this.currentDirection != oldDirection)
 		{
 			//--Since we made a left turn, at our next right turn we
 			//should make a waypoint
+			rc.setIndicatorString(2, "turned left");
 			this.createWaypoint = true;
 		}
 	}
