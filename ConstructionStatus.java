@@ -1,6 +1,6 @@
 package bot;
 
-public enum PastrConstructionStatus {
+public enum ConstructionStatus {
 	NOT_SET,
 	BUILDING,
 	COMPLETED

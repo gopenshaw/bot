@@ -9,19 +9,34 @@ public class Communication {
 	
 	final static int BUILD_PASTR_COMMAND_CHANNEL = 10003;
 	final static int CURRENTLY_BUIDLING_PASTR_CHANNEL = 10004;
-	final static int PASTR_BUILDING_STATUS_CHANNEL = 10005;
+	
+	final static int PASTR_STATUS_CHANNEL = 10005;
+	final static int NOISE_TOWER_STATUS_CHANNEL = 10006;
+	
 	final static int DO_NOT_BUILD_PASTR_VALUE = -1;
 	
 	protected static void setPastrBuildingStatus(
-			PastrConstructionStatus status, RobotController rc) throws GameActionException
+			ConstructionStatus status, RobotController rc) throws GameActionException
 	{
-		rc.broadcast(PASTR_BUILDING_STATUS_CHANNEL, status.ordinal());
+		rc.broadcast(PASTR_STATUS_CHANNEL, status.ordinal());
 	}
 	
-	protected static PastrConstructionStatus getPastrBuildingStatus(RobotController rc) 
+	protected static ConstructionStatus getPastrBuildingStatus(RobotController rc) 
 			throws GameActionException
 	{
-		return PastrConstructionStatus.values()[rc.readBroadcast(PASTR_BUILDING_STATUS_CHANNEL)];
+		return ConstructionStatus.values()[rc.readBroadcast(PASTR_STATUS_CHANNEL)];
+	}
+	
+	protected static void setNoiseTowerBuildingStatus(
+			ConstructionStatus status, RobotController rc) throws GameActionException
+	{
+		rc.broadcast(NOISE_TOWER_STATUS_CHANNEL, status.ordinal());
+	}
+	
+	protected static ConstructionStatus getNoiseTowerBuildingStatus(RobotController rc) 
+			throws GameActionException
+	{
+		return ConstructionStatus.values()[rc.readBroadcast(NOISE_TOWER_STATUS_CHANNEL)];
 	}
 	
 	protected static void setEnemyPastrCount(int count, RobotController rc) 

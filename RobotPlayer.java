@@ -19,10 +19,11 @@ public class RobotPlayer {
 		}
 		else if (rc.getType() == RobotType.PASTR)
 		{
-			while(true)
-			{
-				
-			}
+			Pastr.run(rc);
+		}
+		else if (rc.getType() == RobotType.NOISETOWER)
+		{
+			NoiseTower.run(rc);
 		}
 	}
 }

@@ -68,13 +68,24 @@ public class Soldier {
 			MapLocation location, MovementLogic navigation, RobotController rc) 
 			throws GameActionException
 	{
-		PastrConstructionStatus status = Communication.getPastrBuildingStatus(rc);
+		
 		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(location) < 5
-			&& status == PastrConstructionStatus.NOT_SET)
+		if (currentLocation.distanceSquaredTo(location) < 5)
 		{
-			rc.construct(RobotType.PASTR);
-			Communication.setPastrBuildingStatus(PastrConstructionStatus.BUILDING, rc);
+			ConstructionStatus pastrStatus = Communication.getPastrBuildingStatus(rc);
+			ConstructionStatus noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
+			
+			if (noiseTowerStatus == ConstructionStatus.NOT_SET)
+			{
+				rc.construct(RobotType.NOISETOWER);
+				Communication.setNoiseTowerBuildingStatus(ConstructionStatus.BUILDING, rc);
+			}
+			else if (pastrStatus == ConstructionStatus.NOT_SET
+					&& noiseTowerStatus == ConstructionStatus.COMPLETED)
+			{
+				rc.construct(RobotType.PASTR);
+				Communication.setPastrBuildingStatus(ConstructionStatus.BUILDING, rc);
+			}
 		}
 		else
 		{
