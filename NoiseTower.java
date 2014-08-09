@@ -4,6 +4,9 @@ import battlecode.common.*;
 
 public class NoiseTower 
 {
+	final static int ATTACK_DISTANCE = 6;
+	final static int DIRECTION_HOLD = 2;
+	
 	public static void run(RobotController rc)
 	{
 		try 
@@ -23,13 +26,16 @@ public class NoiseTower
 			{
 				for (int i = 0; i < 8; i++)
 				{
-					MapLocation attackSquare = location.add(Direction.values()[i], 6);
-					if (rc.canAttackSquare(attackSquare))
+					for (int j = 0; j < DIRECTION_HOLD; j++)
 					{
-						rc.attackSquare(attackSquare);
+						MapLocation attackSquare = location.add(Direction.values()[i], ATTACK_DISTANCE);
+						if (rc.canAttackSquare(attackSquare))
+						{
+							rc.attackSquare(attackSquare);
+						}
+						rc.yield();
+						rc.yield();
 					}
-					rc.yield();
-					rc.yield();
 				}
 			}
 			catch (GameActionException e) 
