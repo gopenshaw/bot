@@ -18,7 +18,7 @@ public class Soldier {
 	
 	public static void run(RobotController rc)
 	{
-		MovementLogic navigation = new MovementLogic(rc);
+		MovementLogic navigation = null;
 		
 		while (true)
 		{
@@ -41,6 +41,11 @@ public class Soldier {
 					else 
 					{
 						MapLocation destination = Communication.getDestination(rc);
+						if (navigation == null)
+						{
+							navigation = new MovementLogic(destination, rc);
+						}
+						
 						navigation.moveToward(destination, rc);
 					}
 					

@@ -8,14 +8,17 @@ public class MovementLogic {
 	private MapLocation destination;
 	private Direction currentDirection;
 	private boolean followingWall;
-	private int initialDistance;
+	private int initialDistanceToDestination;
+	private int intialSegmentDistance;
 	private MapLocation segmentStart;
+	private MapLocation segmentEnd;
 	private boolean createWaypoint;
 	
-	public MovementLogic(RobotController rc)
+	public MovementLogic(MapLocation initialDestination, RobotController rc)
 	{
 		this.segmentStart = rc.getLocation();
-		this.destination = new MapLocation(-1, -1);
+		this.destination = initialDestination;
+		this.segmentEnd = initialDestination;
 	}
 	
 	//--TODO: The moveTowards method will cause the robot to go into an infinite loop
@@ -37,10 +40,25 @@ public class MovementLogic {
 		}
 		
 		this.destination = destination;
+		MapLocation locationBeforeMove = rc.getLocation();
+		MapLocation newSegmentEnd = Communication.getSegment(destination, locationBeforeMove, rc);
+		if (newSegmentEnd != null)
+		{
+			this.segmentEnd = newSegmentEnd;
+			this.followingWall = false;
+		}
+		
+		if (locationBeforeMove.equals(this.segmentEnd))
+		{
+			this.segmentEnd = destination;
+			this.followingWall = true;
+		}
+		
+		rc.setIndicatorString(1, "going to " + this.segmentEnd);
+		
 		if (!this.followingWall)
 		{
-			MapLocation currentLocation = rc.getLocation();
-			Direction direction = currentLocation.directionTo(destination);
+			Direction direction = locationBeforeMove.directionTo(this.segmentEnd);
 			
 			if (rc.canMove(direction))
 			{
@@ -52,8 +70,14 @@ public class MovementLogic {
 			//--We will now follow the wall, and we need a distance to
 			//know when we can stop following the wall.
 			this.currentDirection = getNavigableDirection(rc, direction);
-			this.initialDistance = currentLocation.distanceSquaredTo(destination);
-			rc.setIndicatorString(1, "initial distance: " + this.initialDistance);
+			
+			if (this.initialDistanceToDestination == 0)
+			{
+				this.initialDistanceToDestination = locationBeforeMove.distanceSquaredTo(this.segmentEnd);
+			}
+			
+			this.intialSegmentDistance = locationBeforeMove.distanceSquaredTo(this.segmentEnd);
+			
 			this.followingWall = true;
 			//--Since we made a left turn, at our next right turn we
 			//should make a waypoint
@@ -72,20 +96,21 @@ public class MovementLogic {
 		if (this.currentDirection == oldDirection.rotateRight()
 				|| this.currentDirection == oldDirection.rotateRight().rotateRight())
 		{
-			MapLocation currentLocation = rc.getLocation();
+			MapLocation locationAfterMove = rc.getLocation();
 			if (this.createWaypoint
-				&& !this.segmentStart.equals(currentLocation))
+				&& !this.segmentStart.equals(locationAfterMove))
 			{
 				Communication.broadcastSegment(
-						destination, this.segmentStart, currentLocation, rc);
-				rc.setIndicatorString(1, "wp: " + this.segmentStart + " " + currentLocation);
+						destination, this.segmentStart, locationAfterMove, rc);
+				rc.setIndicatorString(1, "wp: " + this.segmentStart + " " + locationAfterMove);
 				this.createWaypoint = false;
 			}
 			
-			this.segmentStart = currentLocation;
+			this.segmentStart = locationAfterMove;
 			
-			int currentDistance = currentLocation.distanceSquaredTo(this.destination);
-			if (currentDistance < this.initialDistance)
+			int currentDistance = locationAfterMove.distanceSquaredTo(destination);
+			if (currentDistance < this.initialDistanceToDestination
+				|| currentDistance < this.intialSegmentDistance)
 			{
 				this.followingWall = false;
 			}
