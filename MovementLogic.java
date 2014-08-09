@@ -34,6 +34,7 @@ public class MovementLogic {
 		
 		if (!this.followingWall)
 		{
+			rc.setIndicatorString(0, "not following wall");
 			MapLocation currentLocation = rc.getLocation();
 			Direction direction = currentLocation.directionTo(destination);
 			
@@ -52,7 +53,7 @@ public class MovementLogic {
 		}
 		
 		//--The robot is following the wall!
-		
+		rc.setIndicatorString(0, "following wall");
 		//--It checks if it can go around a corner
 		Direction cornerDirection = this.currentDirection.rotateRight();
 		if (rc.canMove(cornerDirection))
