@@ -9,6 +9,8 @@ public class MovementLogic {
 	private Direction currentDirection;
 	private boolean followingWall;
 	private int initialDistance;
+	private MapLocation segmentStart;
+	private boolean createWaypoint;
 	
 	public MovementLogic()
 	{
@@ -51,9 +53,13 @@ public class MovementLogic {
 			this.initialDistance = currentLocation.distanceSquaredTo(destination);
 			rc.setIndicatorString(1, "initial distance: " + this.initialDistance);
 			this.followingWall = true;
+			//--Since we made a left turn, at our next right turn we
+			//should make a waypoint
+			this.createWaypoint = true;
 		}
 		
-		//--The robot goes in the right-most direction
+		//--The robot is following the wall and
+		//must go in the right-most direction
 		Direction oldDirection = this.currentDirection;
 		this.currentDirection = 
 				getNavigableDirection(rc, this.currentDirection.rotateRight().rotateRight());
@@ -61,11 +67,28 @@ public class MovementLogic {
 		
 		if (this.currentDirection.ordinal() > oldDirection.ordinal())
 		{
-			int currentDistance = rc.getLocation().distanceSquaredTo(this.destination);
+			MapLocation currentLocation = rc.getLocation();
+			if (this.createWaypoint)
+			{
+				Communication.broadcastSegment(
+						destination, this.segmentStart, currentLocation, rc);
+				rc.setIndicatorString(1, "wp: " + this.segmentStart + " " + currentLocation);
+				this.createWaypoint = false;
+			}
+			
+			this.segmentStart = currentLocation;
+			
+			int currentDistance = currentLocation.distanceSquaredTo(this.destination);
 			if (currentDistance < this.initialDistance)
 			{
 				this.followingWall = false;
 			}
+		}
+		else if (this.currentDirection.ordinal() < oldDirection.ordinal())
+		{
+			//--Since we made a left turn, at our next right turn we
+			//should make a waypoint
+			this.createWaypoint = true;
 		}
 	}
 	
