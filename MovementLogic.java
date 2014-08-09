@@ -10,6 +10,11 @@ public class MovementLogic {
 	private boolean followingWall;
 	private int initialDistance;
 	
+	public MovementLogic()
+	{
+		this.destination = new MapLocation(-1, -1);
+	}
+	
 	//--TODO: The moveTowards method will cause the robot to go into an infinite loop
 	//if the distance to the destination from the corners of an obstacle are never
 	//shorter than the initial distance when the robot first hit the obstacle.
@@ -21,20 +26,15 @@ public class MovementLogic {
 		//--If the robot was following a wall but there is a new destination,
 		//this will force the robot to recalculate its distance from the destination
 		//so it does not get stuck on a wall
-		if (this.destination != null)
+		boolean destinationIsNew = !this.destination.equals(destination);
+		if (destinationIsNew)
 		{
-			boolean destinationIsNew = !this.destination.equals(destination);
-			if (destinationIsNew)
-			{
-				this.followingWall = false;
-			}
+			this.followingWall = false;
 		}
 		
 		this.destination = destination;
-		
 		if (!this.followingWall)
 		{
-			rc.setIndicatorString(0, "not following wall");
 			MapLocation currentLocation = rc.getLocation();
 			Direction direction = currentLocation.directionTo(destination);
 			
@@ -49,12 +49,11 @@ public class MovementLogic {
 			//know when we can stop following the wall.
 			this.currentDirection = getNavigableDirection(rc, direction);
 			this.initialDistance = currentLocation.distanceSquaredTo(destination);
+			rc.setIndicatorString(1, "initial distance: " + this.initialDistance);
 			this.followingWall = true;
 		}
 		
-		//--The robot is following the wall!
-		rc.setIndicatorString(0, "following wall");
-		//--It checks if it can go around a corner
+		//--The robot goes in the right-most direction
 		Direction oldDirection = this.currentDirection;
 		this.currentDirection = 
 				getNavigableDirection(rc, this.currentDirection.rotateRight().rotateRight());
@@ -62,7 +61,8 @@ public class MovementLogic {
 		
 		if (this.currentDirection.ordinal() > oldDirection.ordinal())
 		{
-			if (rc.getLocation().distanceSquaredTo(destination) < this.initialDistance)
+			int currentDistance = rc.getLocation().distanceSquaredTo(this.destination);
+			if (currentDistance < this.initialDistance)
 			{
 				this.followingWall = false;
 			}
