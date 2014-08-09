@@ -55,22 +55,18 @@ public class MovementLogic {
 		//--The robot is following the wall!
 		rc.setIndicatorString(0, "following wall");
 		//--It checks if it can go around a corner
-		Direction cornerDirection = this.currentDirection.rotateRight();
-		if (rc.canMove(cornerDirection))
+		Direction oldDirection = this.currentDirection;
+		this.currentDirection = 
+				getNavigableDirection(rc, this.currentDirection.rotateRight().rotateRight());
+		rc.move(this.currentDirection);
+		
+		if (this.currentDirection.ordinal() > oldDirection.ordinal())
 		{
-			rc.move(cornerDirection);
-			//--If I am now closer than I was when I started,
-			//then I am no longer following the wall.
-			int currentDistance = rc.getLocation().distanceSquaredTo(this.destination);
-			if (currentDistance < this.initialDistance)
+			if (rc.getLocation().distanceSquaredTo(destination) < this.initialDistance)
 			{
 				this.followingWall = false;
-				return;
 			}
 		}
-		
-		this.currentDirection = getNavigableDirection(rc, this.currentDirection);
-		rc.move(this.currentDirection);
 	}
 	
 	private static Direction getNavigableDirection(
