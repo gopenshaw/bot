@@ -12,8 +12,9 @@ public class MovementLogic {
 	private MapLocation segmentStart;
 	private boolean createWaypoint;
 	
-	public MovementLogic()
+	public MovementLogic(RobotController rc)
 	{
+		this.segmentStart = rc.getLocation();
 		this.destination = new MapLocation(-1, -1);
 	}
 	
