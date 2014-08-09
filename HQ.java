@@ -17,26 +17,27 @@ public class HQ {
 			try
 			{
 				spawnRobot(rc);
-				
 				MapLocation[] enemyPastrLocations = 
 						rc.sensePastrLocations(rc.getTeam().opponent());
+				
 				int enemyPastrCount = enemyPastrLocations.length;
 				boolean enemyPastrDestroyed = enemyPastrCount < previousPastrCount;
 				previousPastrCount = enemyPastrCount;
 				
-				Communication.buildPastr(center, rc);
-				
-//				if (enemyPastrCount > 0)
-//				{
-//					Communication.broadcastDestination(enemyPastrLocations[0], rc);
-//				}
-//				else if (enemyPastrDestroyed)
-//				{
-//					rc.setIndicatorString(0, "build a pastr!");
-//					Communication.buildPastr(center, rc);
-//				}
+				if (enemyPastrCount > 0)
+				{
+					rc.setIndicatorString(0, "destroy enemy pastr!");
+					Communication.broadcastDestination(enemyPastrLocations[0], rc);
+				}
+				else if (enemyPastrDestroyed)
+				{
+					rc.setIndicatorString(0, "build a pastr!");
+					Communication.setPastrCommand(ConstructionCommand.BUILD, rc);
+					Communication.buildPastr(center, rc);
+				}
 //				else
 //				{
+//					rc.setIndicatorString(0, "delay pastr...");
 //					Communication.delayPastr(rc);
 //					Communication.broadcastDestination(center, rc);
 //				}

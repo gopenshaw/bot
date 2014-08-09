@@ -24,7 +24,8 @@ public class Soldier {
 			try {
 				if (rc.isActive()) {
 					
-					MapLocation ourPastr = Communication.getPastrLocation(rc);
+					ConstructionCommand pastrCommand = Communication.getPastrCommand(rc);
+					
 					Robot[] nearbyEnemies = rc.senseNearbyGameObjects(
 							Robot.class, 10, rc.getTeam().opponent());
 					
@@ -35,17 +36,19 @@ public class Soldier {
 					}
 					else if (nearbyEnemies.length > 0)
 					{
+						rc.setIndicatorString(0, "attacking an enemy.");
 						attackAnEnemy(rc, nearbyEnemies);
 					}
-					else if (ourPastr != null)
+					else if (pastrCommand == ConstructionCommand.BUILD)
 					{
-						rc.setIndicatorString(1, "going to build pastr at " + ourPastr);
-						//--Assuming navigation is not null here
-						buildPastr(ourPastr, navigation, rc);
+						MapLocation location = Communication.getPastrLocation(rc);
+						rc.setIndicatorString(0, "going to build pastr at " + location);
+						buildPastr(location, navigation, rc);
 					}
 					else
 					{
 						MapLocation destination = Communication.getDestination(rc);
+						rc.setIndicatorString(0, "navigating to " + destination);
 						if (navigation == null)
 						{
 							navigation = new MovementLogic(destination, rc);
@@ -95,7 +98,6 @@ public class Soldier {
 	
 	private static void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
 			throws GameActionException {
-		rc.setIndicatorString(0, "Attacking an enemy. Enemy count is " + nearbyEnemies.length);
 		for (int i = 0; i < nearbyEnemies.length; i++)
 		{
 			RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[i]);

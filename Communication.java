@@ -4,14 +4,15 @@ import battlecode.common.*;
 
 public class Communication {
 	
-	final static int ENEMY_PASTR_COUNT_CHANNEL = 10001;
-	final static int SOLDIER_DESTINATION_CHANNEL = 10002;
+	final static int ENEMY_PASTR_COUNT_CHANNEL = 0;
+	final static int SOLDIER_DESTINATION_CHANNEL = 1;
 	
-	final static int BUILD_PASTR_COMMAND_CHANNEL = 10003;
-	final static int CURRENTLY_BUIDLING_PASTR_CHANNEL = 10004;
+	final static int BUILD_PASTR_COMMAND_CHANNEL = 2;
+	final static int CURRENTLY_BUIDLING_PASTR_CHANNEL = 3;
 	
-	final static int PASTR_STATUS_CHANNEL = 10005;
-	final static int NOISE_TOWER_STATUS_CHANNEL = 10006;
+	final static int PASTR_COMMAND_CHANNEL = 4;
+	final static int PASTR_STATUS_CHANNEL = 5;
+	final static int NOISE_TOWER_STATUS_CHANNEL = 6;
 	
 	final static int DO_NOT_BUILD_PASTR_VALUE = -1;
 	
@@ -60,6 +61,18 @@ public class Communication {
 			throws GameActionException
 	{
 		return decodeMapLocation(rc.readBroadcast(SOLDIER_DESTINATION_CHANNEL));
+	}
+	
+	protected static void setPastrCommand(ConstructionCommand command, RobotController rc) 
+			throws GameActionException
+	{
+		rc.broadcast(PASTR_COMMAND_CHANNEL, command.ordinal());
+	}
+	
+	protected static ConstructionCommand getPastrCommand(RobotController rc)
+			throws GameActionException
+	{
+		return ConstructionCommand.values()[rc.readBroadcast(PASTR_COMMAND_CHANNEL)];
 	}
 	
 	protected static void buildPastr(MapLocation location, RobotController rc) 
