@@ -1,8 +1,8 @@
 package bot.Robots;
 
 import battlecode.common.*;
-import bot.Communication;
-import bot.Enums.Tactic;
+import bot.*;
+import bot.Enums.*;
 
 public class HQ {
 	static int mapWidth = 0;
@@ -12,6 +12,8 @@ public class HQ {
 	static MapLocation enemyHQ;
 	static boolean rallyPointSet = false;
 	static boolean pastrBuild = false;
+	static MapNode[] mapNodes;
+	static int nodeCount = 0;
 	
 	public static void run(RobotController rc)
 	{
@@ -39,7 +41,17 @@ public class HQ {
 					rc.setIndicatorString(0, "calc 2 complete");
 					break;
 				case 3:
-					rc.setIndicatorString(0, "done with calc");
+					rc.setIndicatorString(0, "coarsening map...");
+					mapNodes = coarsenMap(map, mapWidth, mapHeight);
+					rc.setIndicatorString(0, nodeCount + " nodes");
+					break;
+				case 4:
+					for (int i = 0; i < nodeCount; i++)
+					{
+						rc.setIndicatorString(2, mapNodes[i].toString());
+						rc.yield();
+					}
+					break;
 				}
 				
 				setTactic(rc);
@@ -48,6 +60,7 @@ public class HQ {
 			catch (Exception e)
 			{
 				System.out.println("HQ Exception");
+				e.printStackTrace();
 			}
 		}
 	}
@@ -63,6 +76,88 @@ public class HQ {
 		}
 	}
 	
+	private static MapNode[] coarsenMap(TerrainTile[][] map, int width, int height)
+	{
+		MapNode[] nodes = new MapNode[10000];
+		boolean[][] squareCounted = new boolean[width][height];
+		
+		for (int i = 0; i < width; i++)
+		{
+			for (int j = 0; j < height; j++)
+			{
+				if (!squareCounted[i][j])
+				{
+					MapNode node = expandFromHere(i, j, width, height, map, squareCounted);
+					if (node != null)
+					{
+						nodes[nodeCount++] = node;
+					}
+					
+				}
+			}
+		}
+		
+		return nodes;
+	}
+	
+	private static int getMaxHeight(int x, int y, int mapHeight, TerrainTile[][] map, boolean[][] squareCounted)
+	{
+		int thisHeight = 0;
+		while (y + thisHeight + 1 < mapHeight
+				&& !squareCounted[x][y + thisHeight + 1]
+				&& map[x][y + thisHeight + 1] != TerrainTile.VOID)
+		{
+			squareCounted[x][y + thisHeight + 1] = true;
+			thisHeight++;
+		}
+		
+		return thisHeight;
+	}
+	
+	private static int getMaxWidth(int x, int y, int rectangleHeight, int mapWidth, int mapHeight, 
+			TerrainTile[][] map, boolean[][] squareCounted)
+	{
+		int thisWidth = 0;
+		boolean columnClear = true;
+		while (columnClear 
+				&& x + thisWidth + 1 < mapWidth)
+		{
+			for (int i = y; i <= y + rectangleHeight; i++)
+			{
+				if (map[x + thisWidth + 1][i] == TerrainTile.VOID)
+				{
+					columnClear = false;
+					break;
+				}
+			}
+			
+			if (columnClear)
+			{
+				for (int i = y; i <= y + rectangleHeight; i++)
+				{
+					squareCounted[x + thisWidth + 1][i] = true;
+				}
+				thisWidth++;
+			}
+		}
+		
+		return thisWidth;
+	}
+	
+	private static MapNode expandFromHere(int x, int y, int mapWidth, int mapHeight, 
+			TerrainTile[][] map, boolean[][] squareCounted)
+	{
+		squareCounted[x][y] = true;
+		if (map[x][y] == TerrainTile.VOID)
+		{
+			return null;
+		}
+		
+		int rectangleHeight = getMaxHeight(x, y, mapHeight, map, squareCounted);
+		int rectangleWidth = getMaxWidth(x, y, rectangleHeight, mapWidth, mapHeight, map, squareCounted);
+		return new MapNode(y, y + rectangleHeight, x, x + rectangleWidth);
+	}
+	
 	private static void setTactic(RobotController rc) 
 			throws GameActionException
 	{
@@ -76,20 +171,20 @@ public class HQ {
 		
 		if (enemyPastrCount > 0)
 		{
-			rc.setIndicatorString(0, "destroy enemy pastr!");
+			rc.setIndicatorString(1, "destroy enemy pastr!");
 			Communication.setEnemyPastrLocation(enemyPastrLocations[0], rc);
 			Communication.setTactic(Tactic.DESTROY_PASTR, rc);
 		}
 		else if (enemyPastrDestroyed)
 		{
-			rc.setIndicatorString(0, "build a pastr!");
+			rc.setIndicatorString(1, "build a pastr!");
 			Communication.setTactic(Tactic.BUILD_PASTR, rc);
 			pastrBuild = true;
 		}
 		else if (rallyPointSet
 				&& !pastrBuild)
 		{
-			rc.setIndicatorString(0, "rally!");
+			rc.setIndicatorString(1, "rally!");
 			Communication.setTactic(Tactic.RALLY, rc);
 		}
 	}
