@@ -45,6 +45,8 @@ public class HQ {
 					mapNodes = coarsenMap(map, mapWidth, mapHeight);
 					rc.setIndicatorString(0, nodeCount + " nodes");
 					break;
+				case 4:
+					calculateRouteToPastr(mapNodes, nodeCount, rc);
 				}
 				
 				setTactic(rc);
@@ -56,6 +58,12 @@ public class HQ {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private static void calculateRouteToPastr(MapNode[] nodes,
+			int count, RobotController rc) 
+	{
+		
 	}
 
 	//--TODO: Must have more intelligent spawn location(s).
@@ -71,7 +79,7 @@ public class HQ {
 	
 	private static MapNode[] coarsenMap(TerrainTile[][] map, int width, int height)
 	{
-		MapNode[] nodes = new MapNode[10000];
+		MapNode[] nodes = new MapNode[MapNode.MAX_MAP_NODES];
 		boolean[][] squareCounted = new boolean[width][height];
 		
 		for (int i = 0; i < width; i++)
