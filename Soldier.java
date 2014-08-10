@@ -17,44 +17,32 @@ public class Soldier {
 	
 	public static void run(RobotController rc)
 	{
-		MovementLogic navigation = new MovementLogic(new MapLocation(-1, -1), rc);
+		MovementLogic navigation = new MovementLogic();
 		
 		while (true)
 		{
 			try {
 				if (rc.isActive()) {
 					
-					ConstructionCommand pastrCommand = Communication.getPastrCommand(rc);
-					
 					Robot[] nearbyEnemies = rc.senseNearbyGameObjects(
 							Robot.class, 10, rc.getTeam().opponent());
 					
-					if (nearbyEnemies.length >= SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD
-						&& rc.getHealth() < SELF_DESTRUCT_HEALTH_THRESHOLD)
+					if (nearbyEnemies.length > 0)
 					{
-						initiateSelfDestruct(rc, nearbyEnemies);
-					}
-					else if (nearbyEnemies.length > 0)
-					{
-						rc.setIndicatorString(0, "attacking an enemy.");
-						attackAnEnemy(rc, nearbyEnemies);
-					}
-					else if (pastrCommand == ConstructionCommand.BUILD)
-					{
-						MapLocation location = Communication.getPastrLocation(rc);
-						rc.setIndicatorString(0, "going to build pastr at " + location);
-						buildPastr(location, navigation, rc);
+						defendFrom(nearbyEnemies, rc);
 					}
 					else
 					{
-						MapLocation destination = Communication.getDestination(rc);
-						rc.setIndicatorString(0, "navigating to " + destination);
-						if (navigation == null)
+						Tactic tactic = Communication.getTactic(rc);
+						switch (tactic)
 						{
-							navigation = new MovementLogic(destination, rc);
+						case BUILD_PASTR: buildPastr(navigation, rc);
+							break;
+						case CONTROL_CENTER: controlCenter(navigation, rc);
+							break;
+						case DESTROY_PASTR: destroyPastr(navigation, rc);
+							break;
 						}
-						
-						navigation.moveToward(destination, rc);
 					}
 					
 					rc.yield();
@@ -67,13 +55,12 @@ public class Soldier {
 		}
 	}
 	
-	private static void buildPastr(
-			MapLocation location, MovementLogic navigation, RobotController rc) 
+	private static void buildPastr(MovementLogic navigation, RobotController rc) 
 			throws GameActionException
 	{
-		
+		MapLocation destination = Communication.getPastrLocation(rc);
 		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(location) < 5)
+		if (currentLocation.distanceSquaredTo(destination) < 5)
 		{
 			ConstructionStatus pastrStatus = Communication.getPastrBuildingStatus(rc);
 			ConstructionStatus noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
@@ -92,7 +79,39 @@ public class Soldier {
 		}
 		else
 		{
-			navigation.moveToward(location, rc);
+			navigation.moveToward(destination, rc);
+		}
+	}
+	
+	private static void controlCenter(MovementLogic navigation, RobotController rc) 
+			throws GameActionException
+	{
+		MapLocation destination = Communication.getMapCenter(rc);
+		MapLocation currentLocation = rc.getLocation();
+		if (currentLocation.distanceSquaredTo(destination) > 2)
+		{
+			navigation.moveToward(destination, rc);
+		}
+	}
+	
+	private static void destroyPastr(MovementLogic navigation, RobotController rc)
+			throws GameActionException
+	{
+		navigation.moveToward(Communication.getEnemyPastrLocation(rc), rc);
+	}
+	
+	private static void defendFrom(Robot[] nearbyEnemies, RobotController rc) 
+			throws GameActionException
+	{
+		if (nearbyEnemies.length >= SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD
+				&& rc.getHealth() < SELF_DESTRUCT_HEALTH_THRESHOLD)
+		{
+			initiateSelfDestruct(rc, nearbyEnemies);
+		}
+		else if (nearbyEnemies.length > 0)
+		{
+			rc.setIndicatorString(0, "attacking an enemy.");
+			attackAnEnemy(rc, nearbyEnemies);
 		}
 	}
 	

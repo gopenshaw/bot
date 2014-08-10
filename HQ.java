@@ -8,40 +8,24 @@ import battlecode.common.RobotController;
 public class HQ {
 	protected static void run(RobotController rc)
 	{
-		MapLocation center = new MapLocation(
-				rc.getMapWidth() / 2, rc.getMapHeight() / 2);
-		int previousPastrCount = 0;
+		HQMemory state = new HQMemory();
 		
 		while (true)
 		{
+			boolean firstTurn = true;
+			
 			try
 			{
 				spawnRobot(rc);
-				MapLocation[] enemyPastrLocations = 
-						rc.sensePastrLocations(rc.getTeam().opponent());
 				
-				int enemyPastrCount = enemyPastrLocations.length;
-				boolean enemyPastrDestroyed = enemyPastrCount < previousPastrCount;
-				previousPastrCount = enemyPastrCount;
-				
-				if (enemyPastrCount > 0)
+				if (firstTurn)
 				{
-					rc.setIndicatorString(0, "destroy enemy pastr!");
-					Communication.broadcastDestination(enemyPastrLocations[0], rc);
+					Communication.setMapCenter(
+							new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2), rc);
+					firstTurn = false;
 				}
-				else if (enemyPastrDestroyed)
-				{
-					rc.setIndicatorString(0, "build a pastr!");
-					Communication.setPastrCommand(ConstructionCommand.BUILD, rc);
-					Communication.buildPastr(center, rc);
-				}
-//				else
-//				{
-//					rc.setIndicatorString(0, "delay pastr...");
-//					Communication.delayPastr(rc);
-//					Communication.broadcastDestination(center, rc);
-//				}
 				
+				setTactic(state, rc);
 				rc.yield();
 			}
 			catch (Exception e)
@@ -59,6 +43,32 @@ public class HQ {
 			if (rc.senseObjectAtLocation(rc.getLocation().add(toEnemy)) == null) {
 				rc.spawn(toEnemy);
 			}
+		}
+	}
+	
+	private static void setTactic(HQMemory state, RobotController rc) 
+			throws GameActionException
+	{
+		MapLocation[] enemyPastrLocations = 
+				rc.sensePastrLocations(rc.getTeam().opponent());
+		
+		int enemyPastrCount = enemyPastrLocations.length;
+		
+		boolean enemyPastrDestroyed = enemyPastrCount < state.enemyPastrCount;
+		state.enemyPastrCount = enemyPastrCount;
+		
+		if (enemyPastrCount > 0)
+		{
+			rc.setIndicatorString(0, "destroy enemy pastr!");
+			Communication.setEnemyPastrLocation(enemyPastrLocations[0], rc);
+			Communication.setTactic(Tactic.DESTROY_PASTR, rc);
+		}
+		else if (enemyPastrDestroyed)
+		{
+			rc.setIndicatorString(0, "build a pastr!");
+			//--TODO: need intelligent choice of pastr location!
+			Communication.setPastrLocation(Communication.getMapCenter(rc), rc);
+			Communication.setTactic(Tactic.BUILD_PASTR, rc);
 		}
 	}
 }

@@ -10,11 +10,6 @@ public class MovementLogic {
 	private boolean followingWall;
 	private int initialDistanceToDestAtWall;
 	
-	public MovementLogic(MapLocation initialDestination, RobotController rc)
-	{
-		this.destination = initialDestination;
-	}
-	
 	//--TODO: The moveTowards method will cause the robot to go into an infinite loop
 	//if the distance to the destination from the corners of an obstacle are never
 	//shorter than the initial distance when the robot first hit the obstacle.
@@ -26,13 +21,17 @@ public class MovementLogic {
 		//--If the robot was following a wall but there is a new destination,
 		//this will force the robot to recalculate its distance from the destination
 		//so it does not get stuck on a wall
-		boolean destinationIsNew = !this.destination.equals(destination);
-		if (destinationIsNew)
+		if (this.destination != null)
 		{
-			this.followingWall = false;
+			boolean destinationIsNew = !this.destination.equals(destination);
+			if (destinationIsNew)
+			{
+				this.followingWall = false;
+			}
 		}
-		
+
 		this.destination = destination;
+		
 		MapLocation locationBeforeMove = rc.getLocation();
 		
 		if (!this.followingWall)
