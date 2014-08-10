@@ -10,6 +10,8 @@ public class HQ {
 	static int enemyPastrCount = 0;
 	static TerrainTile[][] map;
 	static MapLocation enemyHQ;
+	static boolean rallyPointSet = false;
+	static boolean pastrBuild = false;
 	
 	public static void run(RobotController rc)
 	{
@@ -82,6 +84,13 @@ public class HQ {
 		{
 			rc.setIndicatorString(0, "build a pastr!");
 			Communication.setTactic(Tactic.BUILD_PASTR, rc);
+			pastrBuild = true;
+		}
+		else if (rallyPointSet
+				&& !pastrBuild)
+		{
+			rc.setIndicatorString(0, "rally!");
+			Communication.setTactic(Tactic.RALLY, rc);
 		}
 	}
 	
@@ -112,8 +121,8 @@ public class HQ {
 				}
 			}
 		}
-
 		Communication.setPastrLocation(new MapLocation(xMax, yMax), rc);
+		rallyPointSet = true;
 	}
 	
 	private static boolean adjacentSquaresAreNonZero(double[][] cowGrowth, int x, int y)

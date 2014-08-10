@@ -18,6 +18,7 @@ public class Soldier {
 	final static int SELF_DESTRUCT_HEALTH_THRESHOLD = 38;
 	final static int SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD = 3;
 	final static int SELF_DESTRUCT_WALK_STEPS = 2;
+	final static int CLOSE_ENOUGH_DISTANCE = 3;
 	
 	public static void run(RobotController rc)
 	{
@@ -46,6 +47,7 @@ public class Soldier {
 							break;
 						case DESTROY_PASTR: destroyPastr(navigation, rc);
 							break;
+						case RALLY: rally(navigation, rc);
 						}
 					}
 					
@@ -62,11 +64,10 @@ public class Soldier {
 	private static void buildPastr(MovementLogic navigation, RobotController rc) 
 			throws GameActionException
 	{
-		final int PASTR_GATHER_RADIUS = 4;
-		
+		rc.setIndicatorString(0, "build pastr");
 		MapLocation destination = Communication.getPastrLocation(rc);
 		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(destination) < PASTR_GATHER_RADIUS)
+		if (currentLocation.distanceSquaredTo(destination) < CLOSE_ENOUGH_DISTANCE)
 		{
 			ConstructionStatus pastrStatus = Communication.getPastrBuildingStatus(rc);
 			ConstructionStatus noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
@@ -92,9 +93,22 @@ public class Soldier {
 	private static void controlCenter(MovementLogic navigation, RobotController rc) 
 			throws GameActionException
 	{
+		rc.setIndicatorString(0, "control center");
 		MapLocation destination = Communication.getMapCenter(rc);
 		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(destination) > 2)
+		if (currentLocation.distanceSquaredTo(destination) > CLOSE_ENOUGH_DISTANCE)
+		{
+			navigation.moveToward(destination, rc);
+		}
+	}
+	
+	private static void rally(MovementLogic navigation, RobotController rc) 
+			throws GameActionException
+	{
+		rc.setIndicatorString(0, "rally");
+		MapLocation destination = Communication.getPastrLocation(rc);
+		MapLocation currentLocation = rc.getLocation();
+		if (currentLocation.distanceSquaredTo(destination) > CLOSE_ENOUGH_DISTANCE)
 		{
 			navigation.moveToward(destination, rc);
 		}
@@ -103,6 +117,7 @@ public class Soldier {
 	private static void destroyPastr(MovementLogic navigation, RobotController rc)
 			throws GameActionException
 	{
+		rc.setIndicatorString(0, "destroy pastr");
 		navigation.moveToward(Communication.getEnemyPastrLocation(rc), rc);
 	}
 	
