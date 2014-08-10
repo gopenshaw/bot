@@ -45,13 +45,6 @@ public class HQ {
 					mapNodes = coarsenMap(map, mapWidth, mapHeight);
 					rc.setIndicatorString(0, nodeCount + " nodes");
 					break;
-				case 4:
-					for (int i = 0; i < nodeCount; i++)
-					{
-						rc.setIndicatorString(2, mapNodes[i].toString());
-						rc.yield();
-					}
-					break;
 				}
 				
 				setTactic(rc);
