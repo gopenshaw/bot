@@ -8,6 +8,12 @@ public class HQ {
 	private static class Memory
 	{
 		int enemyPastrCount;
+		boolean firstTurn;
+		
+		Memory()
+		{
+			this.firstTurn = true;
+		}
 	}
 	
 	public static void run(RobotController rc)
@@ -16,17 +22,15 @@ public class HQ {
 		
 		while (true)
 		{
-			boolean firstTurn = true;
-			
 			try
 			{
 				spawnRobot(rc);
 				
-				if (firstTurn)
+				if (state.firstTurn)
 				{
 					Communication.setMapCenter(
 							new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2), rc);
-					firstTurn = false;
+					state.firstTurn = false;
 				}
 				
 				setTactic(state, rc);
