@@ -13,8 +13,7 @@ public class MovementLogic {
 	//--TODO: The moveTowards method will cause the robot to go into an infinite loop
 	//if the distance to the destination from the corners of an obstacle are never
 	//shorter than the initial distance when the robot first hit the obstacle.
-	//--TODO: A robot needs to leave behind 'waypoints' to indicate that the path
-	//has shortcuts. Other robots will follow these 'waypoints' if they exist
+	//--TODO: There are a few ways that this bug movement algorithm could be optimized..
 	public void moveToward(MapLocation destination, RobotController rc) 
 			throws GameActionException
 	{
