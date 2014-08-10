@@ -25,16 +25,16 @@ public class HQ {
 				switch (calculationPhase)
 				{
 				case 1:
-					rc.setIndicatorString(0, "calc 1 complete");
 					mapWidth = rc.getMapWidth();
 					mapHeight = rc.getMapHeight();
 					Communication.setMapCenter(new MapLocation(mapWidth / 2, mapHeight / 2), rc);
-					map = getMap(mapWidth, mapHeight, rc);
+					enemyHQ = rc.senseEnemyHQLocation();
+					setPastrLocation(rc);
+					rc.setIndicatorString(0, "calc 1 complete");
 					break;
 				case 2:
-					enemyHQ = rc.senseEnemyHQLocation();
+					map = getMap(mapWidth, mapHeight, rc);
 					rc.setIndicatorString(0, "calc 2 complete");
-					setPastrLocation(rc);
 					break;
 				case 3:
 					rc.setIndicatorString(0, "done with calc");
