@@ -9,6 +9,7 @@ public class HQ {
 	static int mapHeight = 0;
 	static int enemyPastrCount = 0;
 	static TerrainTile[][] map;
+	static MapLocation enemyHQ;
 	
 	public static void run(RobotController rc)
 	{
@@ -31,6 +32,7 @@ public class HQ {
 					map = getMap(mapWidth, mapHeight, rc);
 					break;
 				case 2:
+					enemyHQ = rc.senseEnemyHQLocation();
 					rc.setIndicatorString(0, "calc 2 complete");
 					setPastrLocation(rc);
 					break;
@@ -91,13 +93,15 @@ public class HQ {
 		int xMax = -1;
 		int yMax = -1;
 		double max = 0;
+		
 		for (int i = 0; i < mapWidth; i+= skipCount)
 		{
 			for (int j = 0; j < mapHeight; j+= skipCount)
 			{
-				if (cowGrowth[i][j] > max)
+				double value = calculatePastrValue(i, j, cowGrowth[i][j]);
+				if (value > max)
 				{
-					max = cowGrowth[i][j];
+					max = value;
 					xMax = i;
 					yMax = j;
 				}
@@ -105,6 +109,14 @@ public class HQ {
 		}
 
 		Communication.setPastrLocation(new MapLocation(xMax, yMax), rc);
+	}
+	
+	private static double calculatePastrValue(int x, int y, double cowGrowth)
+	{
+		final double COW_GROWTH_WEIGHT = 1000;
+		final double DISTANCE_FROM_ENEMY_WEIGHT = 0.01;
+		return cowGrowth * COW_GROWTH_WEIGHT
+				+ new MapLocation(x, y).distanceSquaredTo(enemyHQ) * DISTANCE_FROM_ENEMY_WEIGHT;
 	}
 	
 	private static TerrainTile[][] getMap(int mapWidth, int mapHeight, RobotController rc)
