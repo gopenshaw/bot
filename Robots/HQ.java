@@ -98,6 +98,11 @@ public class HQ {
 		{
 			for (int j = 0; j < mapHeight; j+= skipCount)
 			{
+				if (!adjacentSquaresAreNonZero(cowGrowth, i, j))
+				{
+					continue;
+				}
+				
 				double value = calculatePastrValue(i, j, cowGrowth[i][j]);
 				if (value > max)
 				{
@@ -109,6 +114,31 @@ public class HQ {
 		}
 
 		Communication.setPastrLocation(new MapLocation(xMax, yMax), rc);
+	}
+	
+	private static boolean adjacentSquaresAreNonZero(double[][] cowGrowth, int x, int y)
+	{
+		final int MIN_SQUARES = 4;
+		
+		if (x < MIN_SQUARES 
+			|| y < MIN_SQUARES 
+			|| x + MIN_SQUARES >= mapWidth
+			|| y + MIN_SQUARES >= mapHeight)
+			return false;
+		
+		for (int i = 1; i <= MIN_SQUARES; i ++)
+		{
+			if (cowGrowth[x + i][y] == 0)
+				return false;
+			if (cowGrowth[x - i][y] == 0)
+				return false;
+			if (cowGrowth[x][y + i] == 0)
+				return false;
+			if (cowGrowth[x][y - i] == 0)
+				return false;
+		}
+	
+		return true;
 	}
 	
 	private static double calculatePastrValue(int x, int y, double cowGrowth)
