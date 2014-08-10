@@ -2,13 +2,17 @@ package bot;
 
 import battlecode.common.*;
 
-//--Throughout this class, if the robot hits a wall, it will turn to
-//the left. In other words, it will keep the wall on its right.
 public class MovementLogic {
 	private MapLocation destination;
 	private Direction currentDirection;
 	private boolean followingWall;
 	private int initialDistanceToDestAtWall;
+	boolean turningLeft;
+	
+	public MovementLogic(int robotID)
+	{
+		this.turningLeft = (robotID % 2 == 0);
+	}
 	
 	//--TODO: The moveTowards method will cause the robot to go into an infinite loop
 	//if the distance to the destination from the corners of an obstacle are never
@@ -46,7 +50,8 @@ public class MovementLogic {
 
 			//--We will now follow the wall, and we need a distance to
 			//know when we can stop following the wall.
-			this.currentDirection = getNavigableDirection(rc, direction);
+			this.currentDirection = turningLeft ? 
+					turnLeft(rc, direction) : turnRight(rc, direction);
 			this.initialDistanceToDestAtWall = 
 					locationBeforeMove.distanceSquaredTo(this.destination);
 			this.followingWall = true;
@@ -55,13 +60,22 @@ public class MovementLogic {
 		//--The robot is following the wall and
 		//must go in the right-most direction
 		Direction oldDirection = this.currentDirection;
-		this.currentDirection = 
-				getNavigableDirection(rc, this.currentDirection.rotateRight().rotateRight());
+		this.currentDirection = turningLeft ?
+				turnLeft(rc, this.currentDirection.rotateRight().rotateRight()):
+				turnRight(rc, this.currentDirection.rotateLeft().rotateLeft());
+				
 		rc.move(this.currentDirection);
 		
-		//--Did we turn to the right?
-		if (this.currentDirection == oldDirection.rotateRight()
-				|| this.currentDirection == oldDirection.rotateRight().rotateRight())
+		//--If the robot normally turns left but turned right, or normally
+		//turns right but has turned left, then it just rounded an exterior
+		//corner
+		
+		boolean roundedCorner = turningLeft ?
+				(this.currentDirection == oldDirection.rotateRight()
+				|| this.currentDirection == oldDirection.rotateRight().rotateRight()) :
+				(this.currentDirection == oldDirection.rotateLeft()
+				|| this.currentDirection == oldDirection.rotateLeft().rotateLeft());		
+		if (roundedCorner)
 		{
 			MapLocation locationAfterMove = rc.getLocation();
 			int currentDistance = locationAfterMove.distanceSquaredTo(destination);
@@ -72,7 +86,18 @@ public class MovementLogic {
 		}
 	}
 	
-	private static Direction getNavigableDirection(
+	private static Direction turnRight(
+			RobotController rc, Direction direction)
+	{
+		while (!rc.canMove(direction))
+		{
+			direction = direction.rotateRight();
+		}
+		
+		return direction;
+	}
+	
+	private static Direction turnLeft(
 			RobotController rc, Direction direction)
 	{
 		while (!rc.canMove(direction))

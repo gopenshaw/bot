@@ -22,7 +22,7 @@ public class Soldier {
 	
 	public static void run(RobotController rc)
 	{
-		MovementLogic navigation = new MovementLogic();
+		MovementLogic navigation = new MovementLogic(rc.getRobot().getID());
 		
 		while (true)
 		{
