@@ -5,35 +5,40 @@ import bot.Communication;
 import bot.Enums.Tactic;
 
 public class HQ {
-	private static class Memory
-	{
-		int enemyPastrCount;
-		boolean firstTurn;
-		
-		Memory()
-		{
-			this.firstTurn = true;
-		}
-	}
+	static int mapWidth = 0;
+	static int mapHeight = 0;
+	static int enemyPastrCount = 0;
+	static TerrainTile[][] map;
 	
 	public static void run(RobotController rc)
 	{
-		Memory state = new Memory();
+		int calculationPhase = 0;
 		
 		while (true)
 		{
 			try
 			{
+				calculationPhase++;
 				spawnRobot(rc);
 				
-				if (state.firstTurn)
+				switch (calculationPhase)
 				{
-					Communication.setMapCenter(
-							new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2), rc);
-					state.firstTurn = false;
+				case 1:
+					rc.setIndicatorString(0, "calc 1 complete");
+					mapWidth = rc.getMapWidth();
+					mapHeight = rc.getMapHeight();
+					Communication.setMapCenter(new MapLocation(mapWidth / 2, mapHeight / 2), rc);
+					map = getMap(mapWidth, mapHeight, rc);
+					break;
+				case 2:
+					rc.setIndicatorString(0, "calc 2 complete");
+					setPastrLocation(rc);
+					break;
+				case 3:
+					rc.setIndicatorString(0, "done with calc");
 				}
 				
-				setTactic(state, rc);
+				setTactic(rc);
 				rc.yield();
 			}
 			catch (Exception e)
@@ -54,16 +59,16 @@ public class HQ {
 		}
 	}
 	
-	private static void setTactic(Memory state, RobotController rc) 
+	private static void setTactic(RobotController rc) 
 			throws GameActionException
 	{
 		MapLocation[] enemyPastrLocations = 
 				rc.sensePastrLocations(rc.getTeam().opponent());
 		
-		int enemyPastrCount = enemyPastrLocations.length;
+		int currentEnemyPastrCount = enemyPastrLocations.length;
 		
-		boolean enemyPastrDestroyed = enemyPastrCount < state.enemyPastrCount;
-		state.enemyPastrCount = enemyPastrCount;
+		boolean enemyPastrDestroyed = currentEnemyPastrCount < enemyPastrCount;
+		enemyPastrCount = currentEnemyPastrCount;
 		
 		if (enemyPastrCount > 0)
 		{
@@ -74,10 +79,47 @@ public class HQ {
 		else if (enemyPastrDestroyed)
 		{
 			rc.setIndicatorString(0, "build a pastr!");
-			//--TODO: need intelligent choice of pastr location!
-			Communication.setPastrLocation(Communication.getMapCenter(rc), rc);
 			Communication.setTactic(Tactic.BUILD_PASTR, rc);
 		}
+	}
+	
+	private static void setPastrLocation(RobotController rc) 
+		throws GameActionException
+	{
+		final double[][] cowGrowth = rc.senseCowGrowth();
+		final int skipCount = 2;
+		int xMax = -1;
+		int yMax = -1;
+		double max = 0;
+		for (int i = 0; i < mapWidth; i+= skipCount)
+		{
+			for (int j = 0; j < mapHeight; j+= skipCount)
+			{
+				if (cowGrowth[i][j] > max)
+				{
+					max = cowGrowth[i][j];
+					xMax = i;
+					yMax = j;
+				}
+			}
+		}
+
+		Communication.setPastrLocation(new MapLocation(xMax, yMax), rc);
+	}
+	
+	private static TerrainTile[][] getMap(int mapWidth, int mapHeight, RobotController rc)
+	{
+		TerrainTile[][] map = new TerrainTile[mapWidth][mapHeight];
+		
+		for (int i = 0; i < mapWidth; i++)
+		{
+			for (int j = 0; j < mapHeight; j++) 
+			{
+				map[i][j] = rc.senseTerrainTile(new MapLocation(i, j));
+			}
+		}
+		
+		return map;
 	}
 }
 
