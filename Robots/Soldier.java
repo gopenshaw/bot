@@ -62,9 +62,11 @@ public class Soldier {
 	private static void buildPastr(MovementLogic navigation, RobotController rc) 
 			throws GameActionException
 	{
+		final int PASTR_GATHER_RADIUS = 4;
+		
 		MapLocation destination = Communication.getPastrLocation(rc);
 		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(destination) < 5)
+		if (currentLocation.distanceSquaredTo(destination) < PASTR_GATHER_RADIUS)
 		{
 			ConstructionStatus pastrStatus = Communication.getPastrBuildingStatus(rc);
 			ConstructionStatus noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
