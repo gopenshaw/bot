@@ -1,4 +1,4 @@
-package bot;
+package bot.Robots;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -7,6 +7,10 @@ import battlecode.common.Robot;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import bot.Communication;
+import bot.MovementLogic;
+import bot.Enums.ConstructionStatus;
+import bot.Enums.Tactic;
 
 public class Soldier {
 	

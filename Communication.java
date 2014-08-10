@@ -1,6 +1,8 @@
 package bot;
 
 import battlecode.common.*;
+import bot.Enums.ConstructionStatus;
+import bot.Enums.Tactic;
 
 public class Communication {
 	
@@ -14,83 +16,83 @@ public class Communication {
 	private final static int MAP_CENTER_CHANNEL = 6;
 	private final static int TACTIC_CHANNEL = 7;
 	
-	protected static void setTactic(
+	public static void setTactic(
 			Tactic tactic, RobotController rc) throws GameActionException
 	{
 		rc.broadcast(TACTIC_CHANNEL, tactic.ordinal());
 	}
 	
-	protected static Tactic getTactic(RobotController rc) 
+	public static Tactic getTactic(RobotController rc) 
 			throws GameActionException
 	{
 		return Tactic.values()[rc.readBroadcast(TACTIC_CHANNEL)];
 	}
 	
-	protected static void setMapCenter(
+	public static void setMapCenter(
 			MapLocation location, RobotController rc) throws GameActionException
 	{
 		rc.broadcast(MAP_CENTER_CHANNEL, encodeMapLocation(location));
 	}
 	
-	protected static MapLocation getMapCenter(RobotController rc) 
+	public static MapLocation getMapCenter(RobotController rc) 
 			throws GameActionException
 	{
 		return decodeMapLocation(rc.readBroadcast(MAP_CENTER_CHANNEL));
 	}
 	
-	protected static void setPastrBuildingStatus(
+	public static void setPastrBuildingStatus(
 			ConstructionStatus status, RobotController rc) throws GameActionException
 	{
 		rc.broadcast(PASTR_STATUS_CHANNEL, status.ordinal());
 	}
 	
-	protected static ConstructionStatus getPastrBuildingStatus(RobotController rc) 
+	public static ConstructionStatus getPastrBuildingStatus(RobotController rc) 
 			throws GameActionException
 	{
 		return ConstructionStatus.values()[rc.readBroadcast(PASTR_STATUS_CHANNEL)];
 	}
 	
-	protected static void setNoiseTowerBuildingStatus(
+	public static void setNoiseTowerBuildingStatus(
 			ConstructionStatus status, RobotController rc) throws GameActionException
 	{
 		rc.broadcast(NOISE_TOWER_STATUS_CHANNEL, status.ordinal());
 	}
 	
-	protected static ConstructionStatus getNoiseTowerBuildingStatus(RobotController rc) 
+	public static ConstructionStatus getNoiseTowerBuildingStatus(RobotController rc) 
 			throws GameActionException
 	{
 		return ConstructionStatus.values()[rc.readBroadcast(NOISE_TOWER_STATUS_CHANNEL)];
 	}
 	
-	protected static void setEnemyPastrCount(int count, RobotController rc) 
+	public static void setEnemyPastrCount(int count, RobotController rc) 
 			throws GameActionException
 	{
 		rc.broadcast(ENEMY_PASTR_COUNT_CHANNEL, count);
 	}
 	
-	protected static int getEnemyPastrCount(RobotController rc) 
+	public static int getEnemyPastrCount(RobotController rc) 
 			throws GameActionException
 	{
 		return rc.readBroadcast(ENEMY_PASTR_COUNT_CHANNEL);
 	}
 	
-	protected static void setEnemyPastrLocation(MapLocation location, RobotController rc) 
+	public static void setEnemyPastrLocation(MapLocation location, RobotController rc) 
 			throws GameActionException {
 		rc.broadcast(ENEMY_PASTR_LOCATION_CHANNEL, encodeMapLocation(location));
 	}
 	
-	protected static MapLocation getEnemyPastrLocation(RobotController rc) 
+	public static MapLocation getEnemyPastrLocation(RobotController rc) 
 			throws GameActionException
 	{
 		return decodeMapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_CHANNEL));
 	}
 	
-	protected static void setPastrLocation(MapLocation location, RobotController rc) 
+	public static void setPastrLocation(MapLocation location, RobotController rc) 
 			throws GameActionException {
 		rc.broadcast(PASTR_LOCATION_CHANNEL, encodeMapLocation(location));
 	}
 	
-	protected static MapLocation getPastrLocation(RobotController rc) 
+	public static MapLocation getPastrLocation(RobotController rc) 
 			throws GameActionException
 	{
 		return decodeMapLocation(rc.readBroadcast(PASTR_LOCATION_CHANNEL));

@@ -1,6 +1,8 @@
-package bot;
+package bot.Robots;
 
 import battlecode.common.*;
+import bot.Communication;
+import bot.Enums.ConstructionStatus;
 
 public class Pastr 
 {

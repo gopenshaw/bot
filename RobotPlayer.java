@@ -1,6 +1,10 @@
 package bot;
 
 import battlecode.common.*;
+import bot.Robots.HQ;
+import bot.Robots.NoiseTower;
+import bot.Robots.Pastr;
+import bot.Robots.Soldier;
 
 import java.util.*;
 

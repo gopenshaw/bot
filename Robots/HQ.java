@@ -1,14 +1,18 @@
-package bot;
+package bot.Robots;
 
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
+import battlecode.common.*;
+import bot.Communication;
+import bot.Enums.Tactic;
 
 public class HQ {
-	protected static void run(RobotController rc)
+	private static class Memory
 	{
-		HQMemory state = new HQMemory();
+		int enemyPastrCount;
+	}
+	
+	public static void run(RobotController rc)
+	{
+		Memory state = new Memory();
 		
 		while (true)
 		{
@@ -46,7 +50,7 @@ public class HQ {
 		}
 	}
 	
-	private static void setTactic(HQMemory state, RobotController rc) 
+	private static void setTactic(Memory state, RobotController rc) 
 			throws GameActionException
 	{
 		MapLocation[] enemyPastrLocations = 
@@ -72,3 +76,5 @@ public class HQ {
 		}
 	}
 }
+
+
