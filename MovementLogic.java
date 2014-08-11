@@ -1,6 +1,7 @@
 package bot;
 
 import battlecode.common.*;
+import bot.Enums.NavigationMode;
 
 public class MovementLogic {
 	private MapLocation destination;
@@ -21,6 +22,17 @@ public class MovementLogic {
 	public void moveToward(MapLocation destination, RobotController rc) 
 			throws GameActionException
 	{
+		if (Communication.GetNavigationMode(rc) == NavigationMode.MAP_NODES)
+		{
+			Direction direction = Communication.getDirectionFrom(rc.getLocation(), rc);
+			if (rc.canMove(direction))
+			{
+				rc.move(direction);
+			}
+			
+			return;
+		}
+		
 		//--If the robot was following a wall but there is a new destination,
 		//this will force the robot to recalculate its distance from the destination
 		//so it does not get stuck on a wall

@@ -17,39 +17,64 @@ public class HQ {
 	{
 		int calculationPhase = 0;
 		
+		mapWidth = rc.getMapWidth();
+		mapHeight = rc.getMapHeight();
+		map = getMap(mapWidth, mapHeight, rc);
+		MapLogic.coarsenMap(map, mapWidth, mapHeight);
+		MapLocation enemyHQ = rc.senseEnemyHQLocation();
+		MapLocation teamHQ = rc.getLocation();
+		
+		try {
+			Communication.setTeamHQ(teamHQ, rc);
+			rc.yield();
+			broadcastRouteTo(enemyHQ, rc);
+			rc.yield();
+			Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
+			rc.yield();
+			Communication.setRallyPoint(enemyHQ, rc);
+			rc.yield();
+			Communication.setTactic(Tactic.RALLY, rc);
+			rc.yield();
+			spawnRobot(rc);
+		} catch (GameActionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
 		while (true)
 		{
 			try
 			{
-				calculationPhase++;
-				spawnRobot(rc);
-				
-				switch (calculationPhase)
-				{
-				case 1:
-					mapWidth = rc.getMapWidth();
-					mapHeight = rc.getMapHeight();
-					Communication.setMapCenter(new MapLocation(mapWidth / 2, mapHeight / 2), rc);
-					Communication.setTeamHQ(rc.senseHQLocation(), rc);
-					enemyHQ = rc.senseEnemyHQLocation();
-					setPastrLocation(rc);
-					rc.setIndicatorString(0, "calc 1 complete");
-					break;
-				case 2:
-					map = getMap(mapWidth, mapHeight, rc);
-					rc.setIndicatorString(0, "calc 2 complete");
-					break;
-				case 3:
-					rc.setIndicatorString(0, "coarsening map...");
-					MapLogic.coarsenMap(map, mapWidth, mapHeight);
-					break;
-				case 4:
-					rc.setIndicatorString(0, "broadcasting route to our pastr");
-					broadcastTeamPastrRoute(rc);
-				}
-				
-				setTactic(rc);
-				rc.yield();
+//				calculationPhase++;
+//				spawnRobot(rc);
+//				
+//				switch (calculationPhase)
+//				{
+//				case 1:
+//					mapWidth = rc.getMapWidth();
+//					mapHeight = rc.getMapHeight();
+//					Communication.setMapCenter(new MapLocation(mapWidth / 2, mapHeight / 2), rc);
+//					Communication.setTeamHQ(rc.senseHQLocation(), rc);
+//					enemyHQ = rc.senseEnemyHQLocation();
+//					setPastrLocation(rc);
+//					rc.setIndicatorString(0, "calc 1 complete");
+//					break;
+//				case 2:
+//					map = getMap(mapWidth, mapHeight, rc);
+//					rc.setIndicatorString(0, "calc 2 complete");
+//					break;
+//				case 3:
+//					rc.setIndicatorString(0, "coarsening map...");
+//					MapLogic.coarsenMap(map, mapWidth, mapHeight);
+//					break;
+//				case 4:
+//					rc.setIndicatorString(0, "broadcasting route to our pastr");
+//					broadcastTeamPastrRoute(rc);
+//				}
+//				
+//				setTactic(rc);
+//				rc.yield();
 			}
 			catch (Exception e)
 			{
@@ -59,12 +84,14 @@ public class HQ {
 		}
 	}
 
-	private static void broadcastTeamPastrRoute(RobotController rc) 
+	private static void broadcastRouteTo(MapLocation destination, RobotController rc) 
 			throws GameActionException 
 	{
 		MapLocation teamHQLocation = Communication.getTeamHQ(rc);
-		MapLocation teamPastrLocation = Communication.getPastrLocation(rc);
-		MapNode destinationNode = MapLogic.getRoute(teamHQLocation, teamPastrLocation);
+		System.out.println("team hq: " + teamHQLocation);
+		MapNode destinationNode = MapLogic.getRoute(teamHQLocation, destination);
+		System.out.println("destination node is " + destinationNode.toString());
+		
 		Communication.broadcastNodePath(destinationNode, rc);
 		Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
 	}
@@ -138,7 +165,7 @@ public class HQ {
 				}
 			}
 		}
-		Communication.setPastrLocation(new MapLocation(xMax, yMax), rc);
+		//Communication.setPastrLocation(new MapLocation(xMax, yMax), rc);
 		rallyPointSet = true;
 	}
 	

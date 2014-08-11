@@ -25,6 +25,7 @@ public class MapLogic
 					MapNode node = expandFromHere(i, j, width, height, map, squareCounted);
 					if (node != null)
 					{
+						node.index = nodeCount;
 						nodes[nodeCount++] = node;
 					}
 					
@@ -93,20 +94,27 @@ public class MapLogic
 
 	//--PRECONDITION: coarsenMap has been called
 	public static MapNode getRoute(MapLocation source, MapLocation destination) {
+		boolean[] wasAdded = new boolean[nodeCount];
+		
 		MapNode sourceNode = getNodeContaining(source);
+		System.out.println("source node: " + sourceNode.toString());
 		MapNode destinationNode = getNodeContaining(destination);
+		System.out.println("dest node: " + destinationNode.toString());
 		int nodeIndex = 0;
 		
 		MapNode[] nodeQueue = new MapNode[1000];
 		nodeQueue[nodeIndex++] = sourceNode;
+		wasAdded[sourceNode.index] = true;
 		int currentIndex = 0;
 		
 		MapNode finalNode = null;
-		while (currentIndex < nodeIndex)
+		while (currentIndex <= nodeIndex)
 		{
-			MapNode current = nodes[currentIndex++];
+			MapNode current = nodeQueue[currentIndex++];
+			System.out.println("current: " + current.toString());
 			if (current == destinationNode)
 			{
+				System.out.println("our match: " + current.toString());
 				finalNode = current;
 				break;
 			}
@@ -115,8 +123,11 @@ public class MapLogic
 			for (int i = 0; i < nodeCount; i++)
 			{
 				MapNode node = nodes[i];
-				if (node.isAdjacent(current))
+				if (!wasAdded[node.index]
+					&& node.isAdjacent(current))
 				{
+					System.out.println("adj: " + node);
+					wasAdded[node.index] = true; 
 					node.parent = current;
 					nodeQueue[nodeIndex++] = node;
 				}

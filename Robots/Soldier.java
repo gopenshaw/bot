@@ -65,7 +65,7 @@ public class Soldier {
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "build pastr");
-		MapLocation destination = Communication.getPastrLocation(rc);
+		MapLocation destination = Communication.getRallyPoint(rc);
 		MapLocation currentLocation = rc.getLocation();
 		if (currentLocation.distanceSquaredTo(destination) < CLOSE_ENOUGH_DISTANCE)
 		{
@@ -106,7 +106,7 @@ public class Soldier {
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "rally");
-		MapLocation destination = Communication.getPastrLocation(rc);
+		MapLocation destination = Communication.getRallyPoint(rc);
 		MapLocation currentLocation = rc.getLocation();
 		if (currentLocation.distanceSquaredTo(destination) > CLOSE_ENOUGH_DISTANCE)
 		{

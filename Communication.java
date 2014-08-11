@@ -8,7 +8,7 @@ public class Communication {
 	private final static int TEAM_HQ_LOCATION_CHANNEL = 10000;
 	private final static int ENEMY_PASTR_COUNT_CHANNEL = 10001;
 	private final static int ENEMY_PASTR_LOCATION_CHANNEL = 10002;
-	private final static int PASTR_LOCATION_CHANNEL = 10003;
+	private final static int RALLY_POINT_LOCATION_CHANNEL = 10003;
 	
 	private final static int PASTR_STATUS_CHANNEL = 10004;
 	private final static int NOISE_TOWER_STATUS_CHANNEL = 10005;
@@ -16,6 +16,12 @@ public class Communication {
 	private final static int MAP_CENTER_CHANNEL = 10006;
 	private final static int TACTIC_CHANNEL = 10007;
 	private final static int NAVIGATION_MODE_CHANNEL = 10008;
+	
+	public static Direction getDirectionFrom(MapLocation location, RobotController rc) 
+			throws GameActionException
+	{
+		return Direction.values()[rc.readBroadcast(encodeMapLocation(location))];
+	}
 	
 	public static void setNavigationMode(
 			NavigationMode status, RobotController rc) throws GameActionException
@@ -35,28 +41,36 @@ public class Communication {
 		while (true)
 		{
 			MapNode source = targetNode.parent;
-			MapLocation destination = source.getAdjacentLocationIn(targetNode);
-			for (int i = source.left; i <= source.right; i++)
+			
+			if (source == null)
 			{
-				for (int j = source.top; j <= source.bottom; j++)
-				{
-					MapLocation current = new MapLocation(i, j);
-					rc.broadcast(encodeMapLocation(current), 
-						current.directionTo(destination).ordinal());
-				}
+				System.out.println("no parent");
+				break;
 			}
 			
-			if (source.parent == null)
+			MapLocation destination = source.getAdjacentLocationIn(targetNode);
+			System.out.println("connecting " + source.toString());
+			System.out.println("and " + destination.toString());
+			System.out.println();
+			for (int i = source.xLo; i <= source.xHi; i++)
 			{
-				break;
+				for (int j = source.yLo; j <= source.yHi; j++)
+				{
+					MapLocation current = new MapLocation(i, j);
+					Direction direction = current.directionTo(destination);
+					rc.broadcast(encodeMapLocation(current), direction.ordinal());
+					System.out.println(current.toString() + " " + destination.toString()
+							+ " " + direction.toString());
+					
+				}
 			}
 			
 			targetNode = source;
 		}
 	}
 	
-	public static void setTeamHQ(
-			MapLocation location, RobotController rc) throws GameActionException
+	public static void setTeamHQ(MapLocation location, RobotController rc) 
+			throws GameActionException
 	{
 		rc.broadcast(TEAM_HQ_LOCATION_CHANNEL, encodeMapLocation(location));
 	}
@@ -138,15 +152,15 @@ public class Communication {
 		return decodeMapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_CHANNEL));
 	}
 	
-	public static void setPastrLocation(MapLocation location, RobotController rc) 
+	public static void setRallyPoint(MapLocation location, RobotController rc) 
 			throws GameActionException {
-		rc.broadcast(PASTR_LOCATION_CHANNEL, encodeMapLocation(location));
+		rc.broadcast(RALLY_POINT_LOCATION_CHANNEL, encodeMapLocation(location));
 	}
 	
-	public static MapLocation getPastrLocation(RobotController rc) 
+	public static MapLocation getRallyPoint(RobotController rc) 
 			throws GameActionException
 	{
-		return decodeMapLocation(rc.readBroadcast(PASTR_LOCATION_CHANNEL));
+		return decodeMapLocation(rc.readBroadcast(RALLY_POINT_LOCATION_CHANNEL));
 	}
 	
 	private static int encodeMapLocation(MapLocation location)
