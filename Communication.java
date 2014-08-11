@@ -52,7 +52,8 @@ public class Communication {
 					MapLocation current = new MapLocation(j, k);
 					Direction direction = current.directionTo(location);
 					rc.broadcast(encodeMapLocation(current), direction.ordinal());
-					
+					System.out.println(current.toString() + " " + location.toString()
+							+ " " + direction.toString());
 				}
 			}
 			broadcastTreeMap(adjacent, rc);

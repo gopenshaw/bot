@@ -18,8 +18,8 @@ public class HQ {
 	public static void run(RobotController rc)
 	{
 		int calculationPhase = 0;
-		while (true)
-		{
+//		while (true)
+//		{
 			try
 			{
 				mapWidth = rc.getMapWidth();
@@ -40,7 +40,13 @@ public class HQ {
 				Communication.broadcastTreeMap(treeMap, rc);
 				rc.yield();
 				
+				Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
+				spawnRobot(rc);
 				
+				while (true)
+				{
+					rc.yield();
+				}
 				
 //				calculationPhase++;
 //				spawnRobot(rc);
@@ -89,7 +95,7 @@ public class HQ {
 				System.out.println("HQ Exception");
 				e.printStackTrace();
 			}
-		}
+		//}
 	}
 	
 	private static MapNode getRouteTo(MapLocation destination, RobotController rc) 

@@ -21,6 +21,7 @@ public class MapNode {
 		this.yHi = bottom;
 		this.xLo = left;
 		this.xHi = right;
+		adjacent = new MapNode[MAX_ADJACENT_NODES];
 	}
 	
 	public String toString()

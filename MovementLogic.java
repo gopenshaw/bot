@@ -29,6 +29,14 @@ public class MovementLogic {
 			{
 				rc.move(direction);
 			}
+			else if (rc.canMove(direction.rotateRight()))
+			{
+				rc.move(direction.rotateRight());
+			}
+			else if (rc.canMove(direction.rotateLeft()))
+			{
+				rc.move(direction.rotateLeft());
+			}
 			
 			return;
 		}
