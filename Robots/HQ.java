@@ -16,65 +16,79 @@ public class HQ {
 	public static void run(RobotController rc)
 	{
 		int calculationPhase = 0;
-		
-		mapWidth = rc.getMapWidth();
-		mapHeight = rc.getMapHeight();
-		map = getMap(mapWidth, mapHeight, rc);
-		MapLogic.coarsenMap(map, mapWidth, mapHeight);
-		MapLocation enemyHQ = rc.senseEnemyHQLocation();
-		MapLocation teamHQ = rc.getLocation();
-		
-		try {
-			Communication.setTeamHQ(teamHQ, rc);
-			rc.yield();
-			broadcastRouteTo(enemyHQ, rc);
-			rc.yield();
-			Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
-			rc.yield();
-			Communication.setRallyPoint(enemyHQ, rc);
-			rc.yield();
-			Communication.setTactic(Tactic.RALLY, rc);
-			rc.yield();
-			spawnRobot(rc);
-		} catch (GameActionException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+//		
+//		mapWidth = rc.getMapWidth();
+//		mapHeight = rc.getMapHeight();
+//		map = getMap(mapWidth, mapHeight, rc);
+//		MapLogic.coarsenMap(map, mapWidth, mapHeight);
+//		MapLocation enemyHQ = rc.senseEnemyHQLocation();
+//		MapLocation teamHQ = rc.getLocation();
+//		
+//		try {
+//			Communication.setTeamHQ(teamHQ, rc);
+//			rc.yield();
+//			broadcastRouteTo(enemyHQ, rc);
+//			rc.yield();
+//			Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
+//			rc.yield();
+//			Communication.setRallyPoint(enemyHQ, rc);
+//			rc.yield();
+//			Communication.setTactic(Tactic.RALLY, rc);
+//			rc.yield();
+//			Direction direction = Direction.EAST;
+//			while (true)
+//			{
+//				if(rc.isActive() && rc.senseRobotCount() < 25)
+//				{
+//					if (rc.senseObjectAtLocation(rc.getLocation().add(direction)) == null) {
+//						rc.spawn(direction);
+//						direction = direction.rotateRight();
+//					}
+//					rc.yield();
+//				}
+//			}
+//		} catch (GameActionException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 		
 		
 		while (true)
 		{
 			try
 			{
-//				calculationPhase++;
-//				spawnRobot(rc);
-//				
-//				switch (calculationPhase)
-//				{
-//				case 1:
-//					mapWidth = rc.getMapWidth();
-//					mapHeight = rc.getMapHeight();
-//					Communication.setMapCenter(new MapLocation(mapWidth / 2, mapHeight / 2), rc);
-//					Communication.setTeamHQ(rc.senseHQLocation(), rc);
-//					enemyHQ = rc.senseEnemyHQLocation();
-//					setPastrLocation(rc);
-//					rc.setIndicatorString(0, "calc 1 complete");
-//					break;
-//				case 2:
-//					map = getMap(mapWidth, mapHeight, rc);
-//					rc.setIndicatorString(0, "calc 2 complete");
-//					break;
-//				case 3:
-//					rc.setIndicatorString(0, "coarsening map...");
-//					MapLogic.coarsenMap(map, mapWidth, mapHeight);
-//					break;
-//				case 4:
-//					rc.setIndicatorString(0, "broadcasting route to our pastr");
-//					broadcastTeamPastrRoute(rc);
-//				}
-//				
-//				setTactic(rc);
-//				rc.yield();
+				calculationPhase++;
+				spawnRobot(rc);
+				
+				switch (calculationPhase)
+				{
+				case 1:
+					mapWidth = rc.getMapWidth();
+					mapHeight = rc.getMapHeight();
+					Communication.setMapCenter(new MapLocation(mapWidth / 2, mapHeight / 2), rc);
+					Communication.setTeamHQ(rc.senseHQLocation(), rc);
+					enemyHQ = rc.senseEnemyHQLocation();
+					MapLocation pastrLocation = calculatePastrLocation(rc);
+					Communication.setPastrLocation(pastrLocation, rc);
+					Communication.setRallyPoint(pastrLocation, rc);
+					rallyPointSet = true;
+					rc.setIndicatorString(0, "calc 1 complete");
+					break;
+				case 2:
+					map = getMap(mapWidth, mapHeight, rc);
+					rc.setIndicatorString(0, "calc 2 complete");
+					break;
+				case 3:
+					rc.setIndicatorString(0, "coarsening map...");
+					MapLogic.coarsenMap(map, mapWidth, mapHeight);
+					break;
+				case 4:
+					rc.setIndicatorString(0, "broadcasting route to our pastr");
+					//broadcastTeamPastrRoute(rc);
+				}
+				
+				setTactic(rc);
+				rc.yield();
 			}
 			catch (Exception e)
 			{
@@ -138,7 +152,7 @@ public class HQ {
 		}
 	}
 	
-	private static void setPastrLocation(RobotController rc) 
+	private static MapLocation calculatePastrLocation(RobotController rc) 
 		throws GameActionException
 	{
 		final double[][] cowGrowth = rc.senseCowGrowth();
@@ -165,8 +179,8 @@ public class HQ {
 				}
 			}
 		}
-		//Communication.setPastrLocation(new MapLocation(xMax, yMax), rc);
-		rallyPointSet = true;
+		
+		return new MapLocation(xMax, yMax);
 	}
 	
 	private static boolean adjacentSquaresAreNonZero(double[][] cowGrowth, int x, int y)

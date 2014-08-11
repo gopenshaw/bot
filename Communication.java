@@ -9,6 +9,7 @@ public class Communication {
 	private final static int ENEMY_PASTR_COUNT_CHANNEL = 10001;
 	private final static int ENEMY_PASTR_LOCATION_CHANNEL = 10002;
 	private final static int RALLY_POINT_LOCATION_CHANNEL = 10003;
+	private final static int TEAM_PASTR_LOCATION_CHANNEL = 10009;
 	
 	private final static int PASTR_STATUS_CHANNEL = 10004;
 	private final static int NOISE_TOWER_STATUS_CHANNEL = 10005;
@@ -150,6 +151,17 @@ public class Communication {
 			throws GameActionException
 	{
 		return decodeMapLocation(rc.readBroadcast(ENEMY_PASTR_LOCATION_CHANNEL));
+	}
+	
+	public static void setPastrLocation(MapLocation location, RobotController rc) 
+			throws GameActionException {
+		rc.broadcast(TEAM_PASTR_LOCATION_CHANNEL, encodeMapLocation(location));
+	}
+	
+	public static MapLocation getPastrLocation(RobotController rc) 
+			throws GameActionException
+	{
+		return decodeMapLocation(rc.readBroadcast(TEAM_PASTR_LOCATION_CHANNEL));
 	}
 	
 	public static void setRallyPoint(MapLocation location, RobotController rc) 
