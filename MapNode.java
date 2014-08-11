@@ -3,7 +3,8 @@ package bot;
 import battlecode.common.*;
 
 public class MapNode {
-	public final static int MAX_MAP_NODES = 500;
+	public final static int MAX_MAP_NODES = 1000;
+	public final static int MAX_ADJACENT_NODES = 100;
 	
 	int index;
 	int yLo;
@@ -11,6 +12,8 @@ public class MapNode {
 	int xLo;
 	int xHi;
 	MapNode parent;
+	MapNode[] adjacent;
+	int adjacentCount;
 	
 	public MapNode(int top, int bottom, int left, int right)
 	{

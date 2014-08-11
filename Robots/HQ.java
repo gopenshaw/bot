@@ -22,47 +22,67 @@ public class HQ {
 		{
 			try
 			{
-				calculationPhase++;
-				spawnRobot(rc);
-				
-				switch (calculationPhase)
-				{
-				case 1:
-					mapWidth = rc.getMapWidth();
-					mapHeight = rc.getMapHeight();
-					Communication.setMapCenter(new MapLocation(mapWidth / 2, mapHeight / 2), rc);
-					Communication.setTeamHQ(rc.senseHQLocation(), rc);
-					enemyHQ = rc.senseEnemyHQLocation();
-					MapLocation pastrLocation = calculatePastrLocation(rc);
-					Communication.setPastrLocation(pastrLocation, rc);
-					Communication.setRallyPoint(pastrLocation, rc);
-					rallyPointSet = true;
-					rc.setIndicatorString(0, "calc 1 complete");
-					break;
-				case 2:
-					map = getMap(mapWidth, mapHeight, rc);
-					rc.setIndicatorString(0, "calc 2 complete");
-					break;
-				case 3:
-					rc.setIndicatorString(0, "coarsening map...");
-					coarsenSucceeded = MapLogic.coarsenMap(map, mapWidth, mapHeight);
-					if (!coarsenSucceeded)
-					{
-						calculationPhase += 10;
-						rc.setIndicatorString(0, "coarsening aborted.");
-					}
-					break;
-				case 4:
-					rc.setIndicatorString(0, "calculating route from team hq to team pastr...");
-					route = getRouteTo(Communication.getPastrLocation(rc), rc);
-				case 5:
-					rc.setIndicatorString(0, "calculating route from team hq to team pastr...");
-					broadcastRoute(route, rc);
-					rc.setIndicatorString(0, "calc done");
-				}
-				
-				setTactic(rc);
+				mapWidth = rc.getMapWidth();
+				mapHeight = rc.getMapHeight();
+				map = getMap(mapWidth, mapHeight, rc);
 				rc.yield();
+				
+				coarsenSucceeded = MapLogic.coarsenMap(map, mapWidth, mapHeight);
+				System.out.println("coarsen success: " + coarsenSucceeded);
+				rc.yield();
+				
+				MapLogic.coarsenMap(map, mapWidth, mapHeight);
+				rc.yield();
+				
+				MapNode treeMap = MapLogic.createMapTo(rc.senseEnemyHQLocation());
+				rc.yield();
+				
+				Communication.broadcastTreeMap(treeMap, rc);
+				rc.yield();
+				
+				
+				
+//				calculationPhase++;
+//				spawnRobot(rc);
+//				
+//				switch (calculationPhase)
+//				{
+//				case 1:
+//					mapWidth = rc.getMapWidth();
+//					mapHeight = rc.getMapHeight();
+//					Communication.setMapCenter(new MapLocation(mapWidth / 2, mapHeight / 2), rc);
+//					Communication.setTeamHQ(rc.senseHQLocation(), rc);
+//					enemyHQ = rc.senseEnemyHQLocation();
+//					MapLocation pastrLocation = calculatePastrLocation(rc);
+//					Communication.setPastrLocation(pastrLocation, rc);
+//					Communication.setRallyPoint(pastrLocation, rc);
+//					rallyPointSet = true;
+//					rc.setIndicatorString(0, "calc 1 complete");
+//					break;
+//				case 2:
+//					map = getMap(mapWidth, mapHeight, rc);
+//					rc.setIndicatorString(0, "calc 2 complete");
+//					break;
+//				case 3:
+//					rc.setIndicatorString(0, "coarsening map...");
+//					coarsenSucceeded = MapLogic.coarsenMap(map, mapWidth, mapHeight);
+//					if (!coarsenSucceeded)
+//					{
+//						calculationPhase += 10;
+//						rc.setIndicatorString(0, "coarsening aborted.");
+//					}
+//					break;
+//				case 4:
+//					rc.setIndicatorString(0, "calculating route from team hq to team pastr...");
+//					route = getRouteTo(Communication.getPastrLocation(rc), rc);
+//				case 5:
+//					rc.setIndicatorString(0, "calculating route from team hq to team pastr...");
+//					broadcastRoute(route, rc);
+//					rc.setIndicatorString(0, "calc done");
+//				}
+//				
+//				setTactic(rc);
+//				rc.yield();
 			}
 			catch (Exception e)
 			{

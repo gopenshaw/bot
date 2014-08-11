@@ -158,6 +158,39 @@ public class MapLogic
 		return finalNode;
 	}
 	
+	public static MapNode createMapTo(MapLocation destination)
+	{
+		boolean[] wasAdded = new boolean[nodeCount];
+		MapNode destinationNode = getNodeContaining(destination);
+		
+		int nodeIndex = 0;
+		MapNode[] nodeQueue = new MapNode[MapNode.MAX_MAP_NODES * 10];
+		nodeQueue[nodeIndex++] = destinationNode;
+		wasAdded[destinationNode.index] = true;
+		int currentIndex = 0;
+		
+		while (currentIndex <= nodeIndex)
+		{
+			MapNode current = nodeQueue[currentIndex++];
+			
+			//--Add all nodes that are adjacent to the current node
+			for (int i = 0; i < nodeCount; i++)
+			{
+				MapNode node = nodes[i];
+				if (!wasAdded[node.index]
+					&& isAdjacent[node.index][current.index])
+				{
+					System.out.println("adj: " + node);
+					wasAdded[node.index] = true; 
+					current.adjacent[current.adjacentCount++] = node;
+					nodeQueue[nodeIndex++] = node;
+				}
+			}
+		}
+		
+		return destinationNode;
+	}
+	
 	private static MapNode getNodeContaining(MapLocation location)
 	{
 		for (int i = 0; i < nodeCount; i++)

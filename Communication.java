@@ -36,6 +36,29 @@ public class Communication {
 		return NavigationMode.values()[rc.readBroadcast(NAVIGATION_MODE_CHANNEL)];
 	}
 	
+	public static void broadcastTreeMap(MapNode destinationNode, RobotController rc) 
+			throws GameActionException
+	{
+		MapNode targetNode = destinationNode;
+		
+		for (int i = 0; i < targetNode.adjacentCount; i++)
+		{
+			MapNode adjacent = targetNode.adjacent[i];
+			MapLocation location = adjacent.getAdjacentLocationIn(targetNode);
+			for (int j = adjacent.xLo; j <= adjacent.xHi; j++)
+			{
+				for (int k = adjacent.yLo; k <= adjacent.yHi; k++)
+				{
+					MapLocation current = new MapLocation(j, k);
+					Direction direction = current.directionTo(location);
+					rc.broadcast(encodeMapLocation(current), direction.ordinal());
+					
+				}
+			}
+			broadcastTreeMap(adjacent, rc);
+		}
+	}
+	
 	public static void broadcastNodePath(MapNode destinationNode, RobotController rc) throws GameActionException
 	{
 		MapNode targetNode = destinationNode;
