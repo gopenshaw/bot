@@ -97,9 +97,9 @@ public class MapLogic
 		boolean[] wasAdded = new boolean[nodeCount];
 		
 		MapNode sourceNode = getNodeContaining(source);
-		System.out.println("source node: " + sourceNode.toString());
+//		System.out.println("source node: " + sourceNode.toString());
 		MapNode destinationNode = getNodeContaining(destination);
-		System.out.println("dest node: " + destinationNode.toString());
+//		System.out.println("dest node: " + destinationNode.toString());
 		int nodeIndex = 0;
 		
 		MapNode[] nodeQueue = new MapNode[1000];
@@ -111,10 +111,10 @@ public class MapLogic
 		while (currentIndex <= nodeIndex)
 		{
 			MapNode current = nodeQueue[currentIndex++];
-			System.out.println("current: " + current.toString());
+//			System.out.println("current: " + current.toString());
 			if (current == destinationNode)
 			{
-				System.out.println("our match: " + current.toString());
+//				System.out.println("our match: " + current.toString());
 				finalNode = current;
 				break;
 			}
@@ -126,7 +126,7 @@ public class MapLogic
 				if (!wasAdded[node.index]
 					&& node.isAdjacent(current))
 				{
-					System.out.println("adj: " + node);
+//					System.out.println("adj: " + node);
 					wasAdded[node.index] = true; 
 					node.parent = current;
 					nodeQueue[nodeIndex++] = node;

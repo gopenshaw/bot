@@ -50,9 +50,9 @@ public class Communication {
 			}
 			
 			MapLocation destination = source.getAdjacentLocationIn(targetNode);
-			System.out.println("connecting " + source.toString());
-			System.out.println("and " + destination.toString());
-			System.out.println();
+//			System.out.println("connecting " + source.toString());
+//			System.out.println("and " + destination.toString());
+//			System.out.println();
 			for (int i = source.xLo; i <= source.xHi; i++)
 			{
 				for (int j = source.yLo; j <= source.yHi; j++)
@@ -60,9 +60,8 @@ public class Communication {
 					MapLocation current = new MapLocation(i, j);
 					Direction direction = current.directionTo(destination);
 					rc.broadcast(encodeMapLocation(current), direction.ordinal());
-					System.out.println(current.toString() + " " + destination.toString()
-							+ " " + direction.toString());
-					
+//					System.out.println(current.toString() + " " + destination.toString()
+//							+ " " + direction.toString());
 				}
 			}
 			
