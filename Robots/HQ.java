@@ -16,43 +16,6 @@ public class HQ {
 	public static void run(RobotController rc)
 	{
 		int calculationPhase = 0;
-//		
-//		mapWidth = rc.getMapWidth();
-//		mapHeight = rc.getMapHeight();
-//		map = getMap(mapWidth, mapHeight, rc);
-//		MapLogic.coarsenMap(map, mapWidth, mapHeight);
-//		MapLocation enemyHQ = rc.senseEnemyHQLocation();
-//		MapLocation teamHQ = rc.getLocation();
-//		
-//		try {
-//			Communication.setTeamHQ(teamHQ, rc);
-//			rc.yield();
-//			broadcastRouteTo(enemyHQ, rc);
-//			rc.yield();
-//			Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
-//			rc.yield();
-//			Communication.setRallyPoint(enemyHQ, rc);
-//			rc.yield();
-//			Communication.setTactic(Tactic.RALLY, rc);
-//			rc.yield();
-//			Direction direction = Direction.EAST;
-//			while (true)
-//			{
-//				if(rc.isActive() && rc.senseRobotCount() < 25)
-//				{
-//					if (rc.senseObjectAtLocation(rc.getLocation().add(direction)) == null) {
-//						rc.spawn(direction);
-//						direction = direction.rotateRight();
-//					}
-//					rc.yield();
-//				}
-//			}
-//		} catch (GameActionException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-		
-		
 		while (true)
 		{
 			try
