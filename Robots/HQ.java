@@ -49,6 +49,7 @@ public class HQ {
 					if (!coarsenSucceeded)
 					{
 						calculationPhase += 10;
+						rc.setIndicatorString(0, "coarsening aborted.");
 					}
 					break;
 				case 4:
