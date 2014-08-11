@@ -12,6 +12,7 @@ public class HQ {
 	static MapLocation enemyHQ;
 	static boolean rallyPointSet = false;
 	static boolean pastrBuild = false;
+	static MapNode route;
 	
 	public static void run(RobotController rc)
 	{
@@ -46,8 +47,12 @@ public class HQ {
 					MapLogic.coarsenMap(map, mapWidth, mapHeight);
 					break;
 				case 4:
-					rc.setIndicatorString(0, "broadcasting route to our pastr");
-					//broadcastTeamPastrRoute(rc);
+					rc.setIndicatorString(0, "calculating route from team hq to team pastr...");
+					route = getRouteTo(Communication.getPastrLocation(rc), rc);
+				case 5:
+					rc.setIndicatorString(0, "calculating route from team hq to team pastr...");
+					broadcastRoute(route, rc);
+					rc.setIndicatorString(0, "calc done");
 				}
 				
 				setTactic(rc);
@@ -60,17 +65,19 @@ public class HQ {
 			}
 		}
 	}
-
-	private static void broadcastRouteTo(MapLocation destination, RobotController rc) 
+	
+	private static MapNode getRouteTo(MapLocation destination, RobotController rc) 
 			throws GameActionException 
 	{
 		MapLocation teamHQLocation = Communication.getTeamHQ(rc);
-		System.out.println("team hq: " + teamHQLocation);
-		MapNode destinationNode = MapLogic.getRoute(teamHQLocation, destination);
-		System.out.println("destination node is " + destinationNode.toString());
-		
-		Communication.broadcastNodePath(destinationNode, rc);
-		Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
+		return MapLogic.getRoute(teamHQLocation, destination);
+	}
+
+	private static void broadcastRoute(MapNode route, RobotController rc) 
+			throws GameActionException 
+	{
+		Communication.broadcastNodePath(route, rc);
+		//Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
 	}
 
 	//--TODO: Must have more intelligent spawn location(s).
