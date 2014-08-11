@@ -3,7 +3,7 @@ package bot;
 import battlecode.common.*;
 
 public class MapNode {
-	public final static int MAX_MAP_NODES = 4000;
+	public final static int MAX_MAP_NODES = 500;
 	
 	int index;
 	int yLo;

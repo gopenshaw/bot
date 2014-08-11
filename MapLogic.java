@@ -6,13 +6,14 @@ public class MapLogic
 {
 	private static int nodeCount;
 	private static MapNode[] nodes = new MapNode[MapNode.MAX_MAP_NODES];
+	private static boolean[][] isAdjacent = new boolean[MapNode.MAX_MAP_NODES][MapNode.MAX_MAP_NODES];
 	
 	public static int getNodeCount()
 	{
 		return nodeCount;
 	}
 	
-	public static void coarsenMap(TerrainTile[][] map, int width, int height)
+	public static boolean coarsenMap(TerrainTile[][] map, int width, int height)
 	{
 		boolean[][] squareCounted = new boolean[width][height];
 		
@@ -27,9 +28,29 @@ public class MapLogic
 					{
 						node.index = nodeCount;
 						nodes[nodeCount++] = node;
+						if (nodeCount == MapNode.MAX_MAP_NODES)
+						{
+							return false;
+						}
+						setAdjacent(node);
 					}
 					
 				}
+			}
+		}
+		
+		return true;
+	}
+	
+	private static void setAdjacent(MapNode node)
+	{
+		int nodeIndex = node.index;
+		for (int i = 0; i < nodeIndex; i++)
+		{
+			if (node.isAdjacent(nodes[i]))
+			{
+				isAdjacent[nodeIndex][i] = true;
+				isAdjacent[i][nodeIndex] = true;
 			}
 		}
 	}
@@ -124,7 +145,7 @@ public class MapLogic
 			{
 				MapNode node = nodes[i];
 				if (!wasAdded[node.index]
-					&& node.isAdjacent(current))
+					&& isAdjacent[node.index][current.index])
 				{
 //					System.out.println("adj: " + node);
 					wasAdded[node.index] = true; 
