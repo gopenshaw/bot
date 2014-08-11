@@ -12,8 +12,6 @@ public class HQ {
 	static MapLocation enemyHQ;
 	static boolean rallyPointSet = false;
 	static boolean pastrBuild = false;
-	static MapNode[] mapNodes;
-	static int nodeCount = 0;
 	
 	public static void run(RobotController rc)
 	{
@@ -32,6 +30,7 @@ public class HQ {
 					mapWidth = rc.getMapWidth();
 					mapHeight = rc.getMapHeight();
 					Communication.setMapCenter(new MapLocation(mapWidth / 2, mapHeight / 2), rc);
+					Communication.setTeamHQ(rc.senseHQLocation(), rc);
 					enemyHQ = rc.senseEnemyHQLocation();
 					setPastrLocation(rc);
 					rc.setIndicatorString(0, "calc 1 complete");
@@ -42,11 +41,11 @@ public class HQ {
 					break;
 				case 3:
 					rc.setIndicatorString(0, "coarsening map...");
-					mapNodes = coarsenMap(map, mapWidth, mapHeight);
-					rc.setIndicatorString(0, nodeCount + " nodes");
+					MapLogic.coarsenMap(map, mapWidth, mapHeight);
 					break;
 				case 4:
-					calculateRouteToPastr(mapNodes, nodeCount, rc);
+					rc.setIndicatorString(0, "broadcasting route to our pastr");
+					broadcastTeamPastrRoute(rc);
 				}
 				
 				setTactic(rc);
@@ -60,10 +59,14 @@ public class HQ {
 		}
 	}
 
-	private static void calculateRouteToPastr(MapNode[] nodes,
-			int count, RobotController rc) 
+	private static void broadcastTeamPastrRoute(RobotController rc) 
+			throws GameActionException 
 	{
-		
+		MapLocation teamHQLocation = Communication.getTeamHQ(rc);
+		MapLocation teamPastrLocation = Communication.getPastrLocation(rc);
+		MapNode destinationNode = MapLogic.getRoute(teamHQLocation, teamPastrLocation);
+		Communication.broadcastNodePath(destinationNode, rc);
+		Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
 	}
 
 	//--TODO: Must have more intelligent spawn location(s).
@@ -75,88 +78,6 @@ public class HQ {
 				rc.spawn(toEnemy);
 			}
 		}
-	}
-	
-	private static MapNode[] coarsenMap(TerrainTile[][] map, int width, int height)
-	{
-		MapNode[] nodes = new MapNode[MapNode.MAX_MAP_NODES];
-		boolean[][] squareCounted = new boolean[width][height];
-		
-		for (int i = 0; i < width; i++)
-		{
-			for (int j = 0; j < height; j++)
-			{
-				if (!squareCounted[i][j])
-				{
-					MapNode node = expandFromHere(i, j, width, height, map, squareCounted);
-					if (node != null)
-					{
-						nodes[nodeCount++] = node;
-					}
-					
-				}
-			}
-		}
-		
-		return nodes;
-	}
-	
-	private static int getMaxHeight(int x, int y, int mapHeight, TerrainTile[][] map, boolean[][] squareCounted)
-	{
-		int thisHeight = 0;
-		while (y + thisHeight + 1 < mapHeight
-				&& !squareCounted[x][y + thisHeight + 1]
-				&& map[x][y + thisHeight + 1] != TerrainTile.VOID)
-		{
-			squareCounted[x][y + thisHeight + 1] = true;
-			thisHeight++;
-		}
-		
-		return thisHeight;
-	}
-	
-	private static int getMaxWidth(int x, int y, int rectangleHeight, int mapWidth, int mapHeight, 
-			TerrainTile[][] map, boolean[][] squareCounted)
-	{
-		int thisWidth = 0;
-		boolean columnClear = true;
-		while (columnClear 
-				&& x + thisWidth + 1 < mapWidth)
-		{
-			for (int i = y; i <= y + rectangleHeight; i++)
-			{
-				if (map[x + thisWidth + 1][i] == TerrainTile.VOID)
-				{
-					columnClear = false;
-					break;
-				}
-			}
-			
-			if (columnClear)
-			{
-				for (int i = y; i <= y + rectangleHeight; i++)
-				{
-					squareCounted[x + thisWidth + 1][i] = true;
-				}
-				thisWidth++;
-			}
-		}
-		
-		return thisWidth;
-	}
-	
-	private static MapNode expandFromHere(int x, int y, int mapWidth, int mapHeight, 
-			TerrainTile[][] map, boolean[][] squareCounted)
-	{
-		squareCounted[x][y] = true;
-		if (map[x][y] == TerrainTile.VOID)
-		{
-			return null;
-		}
-		
-		int rectangleHeight = getMaxHeight(x, y, mapHeight, map, squareCounted);
-		int rectangleWidth = getMaxWidth(x, y, rectangleHeight, mapWidth, mapHeight, map, squareCounted);
-		return new MapNode(y, y + rectangleHeight, x, x + rectangleWidth);
 	}
 	
 	private static void setTactic(RobotController rc) 

@@ -1,20 +1,71 @@
 package bot;
 
 import battlecode.common.*;
-import bot.Enums.ConstructionStatus;
-import bot.Enums.Tactic;
+import bot.Enums.*;
 
 public class Communication {
 	
-	private final static int ENEMY_PASTR_COUNT_CHANNEL = 0;
-	private final static int ENEMY_PASTR_LOCATION_CHANNEL = 1;
-	private final static int PASTR_LOCATION_CHANNEL = 2;
+	private final static int TEAM_HQ_LOCATION_CHANNEL = 10000;
+	private final static int ENEMY_PASTR_COUNT_CHANNEL = 10001;
+	private final static int ENEMY_PASTR_LOCATION_CHANNEL = 10002;
+	private final static int PASTR_LOCATION_CHANNEL = 10003;
 	
-	private final static int PASTR_STATUS_CHANNEL = 4;
-	private final static int NOISE_TOWER_STATUS_CHANNEL = 5;
+	private final static int PASTR_STATUS_CHANNEL = 10004;
+	private final static int NOISE_TOWER_STATUS_CHANNEL = 10005;
 	
-	private final static int MAP_CENTER_CHANNEL = 6;
-	private final static int TACTIC_CHANNEL = 7;
+	private final static int MAP_CENTER_CHANNEL = 10006;
+	private final static int TACTIC_CHANNEL = 10007;
+	private final static int NAVIGATION_MODE_CHANNEL = 10008;
+	
+	public static void setNavigationMode(
+			NavigationMode status, RobotController rc) throws GameActionException
+	{
+		rc.broadcast(NAVIGATION_MODE_CHANNEL, status.ordinal());
+	}
+	
+	public static NavigationMode GetNavigationMode(RobotController rc) 
+			throws GameActionException
+	{
+		return NavigationMode.values()[rc.readBroadcast(NAVIGATION_MODE_CHANNEL)];
+	}
+	
+	public static void broadcastNodePath(MapNode destinationNode, RobotController rc) throws GameActionException
+	{
+		MapNode targetNode = destinationNode;
+		while (true)
+		{
+			MapNode source = targetNode.parent;
+			MapLocation destination = source.getAdjacentLocationIn(targetNode);
+			for (int i = source.left; i <= source.right; i++)
+			{
+				for (int j = source.top; j <= source.bottom; j++)
+				{
+					MapLocation current = new MapLocation(i, j);
+					rc.broadcast(encodeMapLocation(current), 
+						current.directionTo(destination).ordinal());
+				}
+			}
+			
+			if (source.parent == null)
+			{
+				break;
+			}
+			
+			targetNode = source;
+		}
+	}
+	
+	public static void setTeamHQ(
+			MapLocation location, RobotController rc) throws GameActionException
+	{
+		rc.broadcast(TEAM_HQ_LOCATION_CHANNEL, encodeMapLocation(location));
+	}
+	
+	public static MapLocation getTeamHQ(RobotController rc) 
+			throws GameActionException
+	{
+		return decodeMapLocation(rc.readBroadcast(TEAM_HQ_LOCATION_CHANNEL));
+	}
 	
 	public static void setTactic(
 			Tactic tactic, RobotController rc) throws GameActionException
