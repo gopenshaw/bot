@@ -13,6 +13,7 @@ public class HQ {
 	static boolean rallyPointSet = false;
 	static boolean pastrBuild = false;
 	static MapNode route;
+	static boolean coarsenSucceeded;
 	
 	public static void run(RobotController rc)
 	{
@@ -44,7 +45,11 @@ public class HQ {
 					break;
 				case 3:
 					rc.setIndicatorString(0, "coarsening map...");
-					MapLogic.coarsenMap(map, mapWidth, mapHeight);
+					coarsenSucceeded = MapLogic.coarsenMap(map, mapWidth, mapHeight);
+					if (!coarsenSucceeded)
+					{
+						calculationPhase += 10;
+					}
 					break;
 				case 4:
 					rc.setIndicatorString(0, "calculating route from team hq to team pastr...");
