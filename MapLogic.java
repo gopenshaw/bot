@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class MapLogic 
 {
-	private static int nodeCount;
+	public static int nodeCount;
 	private static MapNode[] nodes = new MapNode[MapNode.MAX_MAP_NODES];
 	private static boolean[][] isAdjacent = new boolean[MapNode.MAX_MAP_NODES][MapNode.MAX_MAP_NODES];
 	

@@ -28,19 +28,25 @@ public class HQ {
 				map = getMap(mapWidth, mapHeight, rc);
 				rc.yield();
 				
+				rc.setIndicatorString(0, "coarsening...");
 				coarsenSucceeded = MapLogic.coarsenMap(map, mapWidth, mapHeight);
 				System.out.println("coarsen success: " + coarsenSucceeded);
+				System.out.println("node count: " + MapLogic.nodeCount);
 				rc.yield();
 				
 				MapLogic.coarsenMap(map, mapWidth, mapHeight);
 				rc.yield();
 				
+				rc.setIndicatorString(0, "creating map...");
 				MapNode treeMap = MapLogic.createMapTo(rc.senseEnemyHQLocation());
 				rc.yield();
 				
+				rc.setIndicatorString(0, "broadcasting tree");
+				Communication.broadcastNodeDestinations(treeMap, rc.senseEnemyHQLocation(), rc);
 				Communication.broadcastTreeMap(treeMap, rc);
 				rc.yield();
 				
+				rc.setIndicatorString(0, "Nav mode set.");
 				Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
 				spawnRobot(rc);
 				
