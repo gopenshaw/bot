@@ -4,12 +4,8 @@ import battlecode.common.*;
 import bot.*;
 import bot.Enums.*;
 
-//--TODO: a lot of map specific code should be moved to map logic
 public class HQ {
-	static int mapWidth = 0;
-	static int mapHeight = 0;
 	static int enemyPastrCount = 0;
-	static TerrainTile[][] map;
 	static MapLocation enemyHQ;
 	static boolean rallyPointSet = false;
 	static boolean pastrBuild = false;
@@ -22,19 +18,11 @@ public class HQ {
 //		while (true)
 //		{
 			try
-			{
-				mapWidth = rc.getMapWidth();
-				mapHeight = rc.getMapHeight();
-				map = getMap(mapWidth, mapHeight, rc);
-				rc.yield();
-				
+			{	
 				rc.setIndicatorString(0, "coarsening...");
-				coarsenSucceeded = MapLogic.coarsenMap(map, mapWidth, mapHeight);
+				coarsenSucceeded = MapLogic.coarsenMap(rc);
 				System.out.println("coarsen success: " + coarsenSucceeded);
 				System.out.println("node count: " + MapLogic.nodeCount);
-				rc.yield();
-				
-				MapLogic.coarsenMap(map, mapWidth, mapHeight);
 				rc.yield();
 				
 				rc.setIndicatorString(0, "creating map...");
@@ -159,85 +147,6 @@ public class HQ {
 			rc.setIndicatorString(1, "rally!");
 			Communication.setTactic(Tactic.RALLY, rc);
 		}
-	}
-	
-	private static MapLocation calculatePastrLocation(RobotController rc) 
-		throws GameActionException
-	{
-		final double[][] cowGrowth = rc.senseCowGrowth();
-		final int skipCount = 2;
-		int xMax = -1;
-		int yMax = -1;
-		double max = 0;
-		
-		for (int i = 0; i < mapWidth; i+= skipCount)
-		{
-			for (int j = 0; j < mapHeight; j+= skipCount)
-			{
-				if (!adjacentSquaresAreNonZero(cowGrowth, i, j))
-				{
-					continue;
-				}
-				
-				double value = calculatePastrValue(i, j, cowGrowth[i][j]);
-				if (value > max)
-				{
-					max = value;
-					xMax = i;
-					yMax = j;
-				}
-			}
-		}
-		
-		return new MapLocation(xMax, yMax);
-	}
-	
-	private static boolean adjacentSquaresAreNonZero(double[][] cowGrowth, int x, int y)
-	{
-		final int MIN_SQUARES = 4;
-		
-		if (x < MIN_SQUARES 
-			|| y < MIN_SQUARES 
-			|| x + MIN_SQUARES >= mapWidth
-			|| y + MIN_SQUARES >= mapHeight)
-			return false;
-		
-		for (int i = 1; i <= MIN_SQUARES; i ++)
-		{
-			if (cowGrowth[x + i][y] == 0)
-				return false;
-			if (cowGrowth[x - i][y] == 0)
-				return false;
-			if (cowGrowth[x][y + i] == 0)
-				return false;
-			if (cowGrowth[x][y - i] == 0)
-				return false;
-		}
-	
-		return true;
-	}
-	
-	private static double calculatePastrValue(int x, int y, double cowGrowth)
-	{
-		final double COW_GROWTH_WEIGHT = 1000;
-		final double DISTANCE_FROM_ENEMY_WEIGHT = 0.01;
-		return cowGrowth * COW_GROWTH_WEIGHT
-				+ new MapLocation(x, y).distanceSquaredTo(enemyHQ) * DISTANCE_FROM_ENEMY_WEIGHT;
-	}
-	
-	private static TerrainTile[][] getMap(int mapWidth, int mapHeight, RobotController rc)
-	{
-		TerrainTile[][] map = new TerrainTile[mapWidth][mapHeight];
-		
-		for (int i = 0; i < mapWidth; i++)
-		{
-			for (int j = 0; j < mapHeight; j++) 
-			{
-				map[i][j] = rc.senseTerrainTile(new MapLocation(i, j));
-			}
-		}
-		
-		return map;
 	}
 }
 
