@@ -24,7 +24,10 @@ public class MovementLogic {
 	{
 		if (Communication.GetNavigationMode(rc) == NavigationMode.MAP_NODES)
 		{
-			Direction direction = Communication.getDirectionFrom(rc.getLocation(), rc);
+			MapLocation currentLocation = rc.getLocation();
+			rc.yield();
+			MapLocation segmentDestination = Communication.getDestinationFrom(currentLocation, rc);
+			Direction direction = currentLocation.directionTo(segmentDestination);
 			if (rc.canMove(direction))
 			{
 				rc.move(direction);

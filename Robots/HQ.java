@@ -26,16 +26,14 @@ public class HQ {
 				rc.yield();
 				
 				rc.setIndicatorString(0, "creating map...");
-				MapNode treeMap = MapLogic.createMapTo(rc.senseEnemyHQLocation());
-				rc.yield();
-				
-				rc.setIndicatorString(0, "broadcasting tree");
-				Communication.broadcastNodeDestinations(treeMap, rc.senseEnemyHQLocation(), rc);
-				Communication.broadcastTreeMap(treeMap, rc);
+				MapLogic.createMapTo(rc.senseEnemyHQLocation(), rc);
+				System.out.println("map created and broadcasted");
 				rc.yield();
 				
 				rc.setIndicatorString(0, "Nav mode set.");
 				Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
+				Communication.setRallyPoint(rc.senseEnemyHQLocation(), rc);
+				Communication.setTactic(Tactic.RALLY, rc);
 				spawnRobot(rc);
 				
 				while (true)
@@ -91,13 +89,6 @@ public class HQ {
 				e.printStackTrace();
 			}
 		//}
-	}
-	
-	private static MapNode getRouteTo(MapLocation destination, RobotController rc) 
-			throws GameActionException 
-	{
-		MapLocation teamHQLocation = Communication.getTeamHQ(rc);
-		return MapLogic.getRoute(teamHQLocation, destination);
 	}
 
 	private static void broadcastRoute(MapNode route, RobotController rc) 

@@ -10,7 +10,6 @@ public class MapLogic
 	private static int mapHeight = NOT_SET_VALUE;
 	private static TerrainTile[][] map;
 	private static MapNode[] nodes = new MapNode[MapNode.MAX_MAP_NODES];
-	private static boolean[][] isAdjacent = new boolean[MapNode.MAX_MAP_NODES][MapNode.MAX_MAP_NODES];
 	
 	public static int getNodeCount()
 	{
@@ -111,14 +110,14 @@ public class MapLogic
 		return map;
 	}
 	
-	public static boolean coarsenMap(RobotController rc)
+	public static boolean coarsenMap(RobotController rc) throws GameActionException
 	{
 		if (map == null)
 		{
 			map = getMap(rc);
 		}
 		
-		
+		System.out.println("index grid set");
 		boolean[][] squareCounted = new boolean[mapWidth][mapHeight];
 		
 		for (int i = 0; i < mapWidth; i++)
@@ -132,6 +131,7 @@ public class MapLogic
 					{
 						node.index = nodeCount;
 						nodes[nodeCount++] = node;
+						markNodeIndexOnGrid(node, rc);
 						if (nodeCount == MapNode.MAX_MAP_NODES)
 						{
 							return false;
@@ -146,15 +146,29 @@ public class MapLogic
 		return true;
 	}
 	
+	private static void markNodeIndexOnGrid(MapNode node, RobotController rc) 
+			throws GameActionException
+	{
+		int index = node.index;
+		for (int x = node.xLo; x <= node.xHi; x++)
+		{
+			for (int y = node.xLo; y <= node.yHi; y++)
+			{
+				Communication.setNodeIndex(index, new MapLocation(x, y), rc);
+			}
+		}
+	}
+	
 	private static void setAdjacent(MapNode node)
 	{
 		int nodeIndex = node.index;
 		for (int i = 0; i < nodeIndex; i++)
 		{
-			if (node.isAdjacent(nodes[i]))
+			MapNode otherNode = nodes[i];
+			if (node.isAdjacent(otherNode))
 			{
-				isAdjacent[nodeIndex][i] = true;
-				isAdjacent[i][nodeIndex] = true;
+				node.adjacent[node.adjacentCount++] = otherNode;
+				otherNode.adjacent[otherNode.adjacentCount++] = node;
 			}
 		}
 	}
@@ -216,94 +230,37 @@ public class MapLogic
 		int rectangleWidth = getMaxWidth(x, y, rectangleHeight, mapWidth, mapHeight, map, squareCounted);
 		return new MapNode(y, y + rectangleHeight, x, x + rectangleWidth);
 	}
-
-	//--PRECONDITION: coarsenMap has been called
-	public static MapNode getRoute(MapLocation source, MapLocation destination) {
-		boolean[] wasAdded = new boolean[nodeCount];
+	
+	public static void createMapTo(MapLocation destination, RobotController rc) 
+		throws GameActionException
+	{
+		boolean[] wasMapped = new boolean[nodeCount];
+		int nodeIndex = Communication.getNodeThatContains(destination, rc);
+		wasMapped[nodeIndex] = true;
+		MapNode node = nodes[nodeIndex];
+		Communication.setNodeTarget(nodeIndex, destination, rc);
 		
-		MapNode sourceNode = getNodeContaining(source);
-		System.out.println("source node: " + sourceNode.toString());
-		MapNode destinationNode = getNodeContaining(destination);
-		System.out.println("dest node: " + destinationNode.toString());
-		int nodeIndex = 0;
-		
-		MapNode[] nodeQueue = new MapNode[1000];
-		nodeQueue[nodeIndex++] = sourceNode;
-		wasAdded[sourceNode.index] = true;
-		int currentIndex = 0;
-		
-		MapNode finalNode = null;
-		while (currentIndex <= nodeIndex)
-		{
-			MapNode current = nodeQueue[currentIndex++];
-			System.out.println("current: " + current.toString());
-			if (current == destinationNode)
-			{
-				System.out.println("our match: " + current.toString());
-				finalNode = current;
-				break;
-			}
-			
-			//--Add all nodes that are adjacent to the current node
-			for (int i = 0; i < nodeCount; i++)
-			{
-				MapNode node = nodes[i];
-				if (!wasAdded[node.index]
-					&& isAdjacent[node.index][current.index])
-				{
-					System.out.println("adj: " + node);
-					wasAdded[node.index] = true; 
-					node.parent = current;
-					nodeQueue[nodeIndex++] = node;
-				}
-			}
-		}
-		
-		return finalNode;
+		recursiveMap(node, wasMapped, rc);
 	}
 	
-	public static MapNode createMapTo(MapLocation destination)
-	{
-		boolean[] wasAdded = new boolean[nodeCount];
-		MapNode destinationNode = getNodeContaining(destination);
-		
-		int nodeIndex = 0;
-		MapNode[] nodeQueue = new MapNode[MapNode.MAX_MAP_NODES * 10];
-		nodeQueue[nodeIndex++] = destinationNode;
-		wasAdded[destinationNode.index] = true;
-		int currentIndex = 0;
-		
-		while (currentIndex <= nodeIndex)
+	private static void recursiveMap(MapNode destination, boolean[] wasMapped, RobotController rc) 
+			throws GameActionException
+	{	
+		//--This method will map all unmapped adjacent nodes to their destination
+		for (int i = 0; i < destination.adjacentCount; i++)
 		{
-			MapNode current = nodeQueue[currentIndex++];
+			MapNode adjacent = destination.adjacent[i];
+			int index = adjacent.index;
+			if (wasMapped[index])
+			{
+				continue;
+			}
 			
-			//--Add all nodes that are adjacent to the current node
-			for (int i = 0; i < nodeCount; i++)
-			{
-				MapNode node = nodes[i];
-				if (!wasAdded[node.index]
-					&& isAdjacent[node.index][current.index])
-				{
-					System.out.println("adj: " + node);
-					wasAdded[node.index] = true; 
-					current.adjacent[current.adjacentCount++] = node;
-					nodeQueue[nodeIndex++] = node;
-				}
-			}
+			System.out.println("node " + adjacent.index + " is mapped to node " + destination.index);
+			wasMapped[index] = true;
+			MapLocation target = adjacent.getAdjacentLocationIn(destination);
+			Communication.setNodeTarget(index, target, rc);
+			recursiveMap(adjacent, wasMapped, rc);
 		}
-		
-		return destinationNode;
-	}
-	
-	private static MapNode getNodeContaining(MapLocation location)
-	{
-		for (int i = 0; i < nodeCount; i++)
-		{
-			if (nodes[i].contains(location))
-			{
-				return nodes[i];
-			}
-		}
-		return null;
 	}
 }

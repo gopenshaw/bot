@@ -18,10 +18,31 @@ public class Communication {
 	private final static int TACTIC_CHANNEL = 10007;
 	private final static int NAVIGATION_MODE_CHANNEL = 10008;
 	
-	public static Direction getDirectionFrom(MapLocation location, RobotController rc) 
+	private final static int NODE_OFFSET_VALUE = 20000;
+	
+	public static MapLocation getDestinationFrom(MapLocation location, RobotController rc) 
 			throws GameActionException
 	{
-		return Direction.values()[rc.readBroadcast(encodeMapLocation(location))];
+		int nodeIndex = getNodeThatContains(location, rc);
+		return decodeMapLocation(rc.readBroadcast(nodeIndex));
+	}
+	
+	public static void setNodeTarget(int nodeIndex, MapLocation location, RobotController rc) 
+			throws GameActionException
+	{
+		rc.broadcast(nodeIndex, encodeMapLocation(location));
+	}
+	
+	public static void setNodeIndex(int index, MapLocation location, RobotController rc) 
+			throws GameActionException
+	{
+		rc.broadcast(encodeMapLocation(location), index);
+	}
+	
+	public static int getNodeThatContains(MapLocation location, RobotController rc) 
+			throws GameActionException
+	{
+		return rc.readBroadcast(encodeMapLocation(location));
 	}
 	
 	public static void setNavigationMode(
@@ -62,10 +83,10 @@ public class Communication {
 		{
 			MapNode adjacent = targetNode.adjacent[i];
 			MapLocation location = adjacent.getAdjacentLocationIn(targetNode);
-			System.out.println();
-			System.out.println("connecting " + adjacent.toString());
-			System.out.println("and " + targetNode.toString());
-			System.out.println();
+//			System.out.println();
+//			System.out.println("connecting " + adjacent.toString());
+//			System.out.println("and " + targetNode.toString());
+//			System.out.println();
 			broadcastNodeDestinations(adjacent, location, rc);
 			broadcastTreeMap(adjacent, rc);
 		}
