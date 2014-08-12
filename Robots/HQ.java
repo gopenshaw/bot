@@ -4,6 +4,7 @@ import battlecode.common.*;
 import bot.*;
 import bot.Enums.*;
 
+//--TODO: a lot of map specific code should be moved to map logic
 public class HQ {
 	static int mapWidth = 0;
 	static int mapHeight = 0;
