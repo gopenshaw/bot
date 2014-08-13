@@ -9,6 +9,7 @@ public class MovementLogic {
 	private boolean followingWall;
 	private int initialDistanceToDestAtWall;
 	boolean turningLeft;
+	private MapLocation segmentDestination;
 	
 	public MovementLogic(int robotID)
 	{
@@ -25,9 +26,14 @@ public class MovementLogic {
 		if (Communication.GetNavigationMode(rc) == NavigationMode.MAP_NODES)
 		{
 			MapLocation currentLocation = rc.getLocation();
-			rc.yield();
-			MapLocation segmentDestination = Communication.getDestinationFrom(currentLocation, rc);
+			if (segmentDestination == null
+				|| currentLocation.equals(segmentDestination))
+			{
+				segmentDestination = Communication.getDestinationFrom(currentLocation, rc);
+			}
+			
 			Direction direction = currentLocation.directionTo(segmentDestination);
+			
 			if (rc.canMove(direction))
 			{
 				rc.move(direction);

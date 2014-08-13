@@ -231,6 +231,8 @@ public class MapLogic
 		return new MapNode(y, y + rectangleHeight, x, x + rectangleWidth);
 	}
 	
+	//--Need to do breadth first instead of depth first
+	//--Test on longetylong128 for a good example!
 	public static void createMapTo(MapLocation destination, RobotController rc) 
 		throws GameActionException
 	{
@@ -260,7 +262,7 @@ public class MapLogic
 				continue;
 			}
 			
-			System.out.println("node " + adjacent.index + " is mapped to node " + destination.index);
+//			System.out.println("node " + adjacent.index + " is mapped to node " + destination.index);
 			wasMapped[index] = true;
 			MapLocation target = adjacent.getAdjacentLocationIn(destination);
 			Communication.setNodeTarget(index, target, rc);
