@@ -25,12 +25,15 @@ public class HQ {
 				System.out.println("node count: " + MapLogic.nodeCount);
 				rc.yield();
 				
-				rc.setIndicatorString(0, "creating map...");
-				MapLogic.createMapTo(rc.senseEnemyHQLocation(), rc);
-				System.out.println("map created and broadcasted");
+				MapLogic.markNodeIndexOnGrid(rc);
+				System.out.println("grid marked");
 				rc.yield();
 				
-				rc.setIndicatorString(0, "Nav mode set.");
+				rc.setIndicatorString(0, "creating map...");
+				MapLogic.createMapTo(rc.senseEnemyHQLocation(), rc);
+				System.out.println("map created.");
+				rc.yield();
+				
 				Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
 				Communication.setRallyPoint(rc.senseEnemyHQLocation(), rc);
 				Communication.setTactic(Tactic.RALLY, rc);

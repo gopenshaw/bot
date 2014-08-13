@@ -131,7 +131,6 @@ public class MapLogic
 					{
 						node.index = nodeCount;
 						nodes[nodeCount++] = node;
-						markNodeIndexOnGrid(node, rc);
 						if (nodeCount == MapNode.MAX_MAP_NODES)
 						{
 							return false;
@@ -146,15 +145,18 @@ public class MapLogic
 		return true;
 	}
 	
-	private static void markNodeIndexOnGrid(MapNode node, RobotController rc) 
+	public static void markNodeIndexOnGrid(RobotController rc) 
 			throws GameActionException
 	{
-		int index = node.index;
-		for (int x = node.xLo; x <= node.xHi; x++)
+		for (int i = 0; i < nodeCount; i++)
 		{
-			for (int y = node.yLo; y <= node.yHi; y++)
+			MapNode node = nodes[i];
+			for (int x = node.xLo; x <= node.xHi; x++)
 			{
-				Communication.setNodeIndex(index, new MapLocation(x, y), rc);
+				for (int y = node.yLo; y <= node.yHi; y++)
+				{
+					Communication.setNodeIndex(i, new MapLocation(x, y), rc);
+				}
 			}
 		}
 	}
