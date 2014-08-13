@@ -24,13 +24,13 @@ public class Communication {
 			throws GameActionException
 	{
 		int nodeIndex = getNodeThatContains(location, rc);
-		return decodeMapLocation(rc.readBroadcast(nodeIndex));
+		return decodeMapLocation(rc.readBroadcast(NODE_OFFSET_VALUE + nodeIndex));
 	}
 	
 	public static void setNodeTarget(int nodeIndex, MapLocation location, RobotController rc) 
 			throws GameActionException
 	{
-		rc.broadcast(nodeIndex, encodeMapLocation(location));
+		rc.broadcast(NODE_OFFSET_VALUE + nodeIndex, encodeMapLocation(location));
 	}
 	
 	public static void setNodeIndex(int index, MapLocation location, RobotController rc) 
@@ -57,63 +57,63 @@ public class Communication {
 		return NavigationMode.values()[rc.readBroadcast(NAVIGATION_MODE_CHANNEL)];
 	}
 	
-	public static void broadcastNodeDestinations(
-			MapNode node, MapLocation target, RobotController rc) 
-			throws GameActionException
-	{
-		for (int i = node.xLo; i <= node.xHi; i++)
-		{
-			for (int j = node.yLo; j <= node.yHi; j++)
-			{
-				MapLocation current = new MapLocation(i, j);
-				Direction direction = current.directionTo(target);
-				rc.broadcast(encodeMapLocation(current), direction.ordinal());
-//				System.out.println(current.toString() + " " + location.toString()
-//				+ " " + direction.toString());
-			}
-		}
-	}
+//	public static void broadcastNodeDestinations(
+//			MapNode node, MapLocation target, RobotController rc) 
+//			throws GameActionException
+//	{
+//		for (int i = node.xLo; i <= node.xHi; i++)
+//		{
+//			for (int j = node.yLo; j <= node.yHi; j++)
+//			{
+//				MapLocation current = new MapLocation(i, j);
+//				Direction direction = current.directionTo(target);
+//				rc.broadcast(encodeMapLocation(current), direction.ordinal());
+////				System.out.println(current.toString() + " " + location.toString()
+////				+ " " + direction.toString());
+//			}
+//		}
+//	}
 	
-	public static void broadcastTreeMap(MapNode destinationNode, RobotController rc) 
-			throws GameActionException
-	{
-		MapNode targetNode = destinationNode;
-		
-		for (int i = 0; i < targetNode.adjacentCount; i++)
-		{
-			MapNode adjacent = targetNode.adjacent[i];
-			MapLocation location = adjacent.getAdjacentLocationIn(targetNode);
-//			System.out.println();
-//			System.out.println("connecting " + adjacent.toString());
-//			System.out.println("and " + targetNode.toString());
-//			System.out.println();
-			broadcastNodeDestinations(adjacent, location, rc);
-			broadcastTreeMap(adjacent, rc);
-		}
-	}
+//	public static void broadcastTreeMap(MapNode destinationNode, RobotController rc) 
+//			throws GameActionException
+//	{
+//		MapNode targetNode = destinationNode;
+//		
+//		for (int i = 0; i < targetNode.adjacentCount; i++)
+//		{
+//			MapNode adjacent = targetNode.adjacent[i];
+//			MapLocation location = adjacent.getAdjacentLocationIn(targetNode);
+////			System.out.println();
+////			System.out.println("connecting " + adjacent.toString());
+////			System.out.println("and " + targetNode.toString());
+////			System.out.println();
+//			broadcastNodeDestinations(adjacent, location, rc);
+//			broadcastTreeMap(adjacent, rc);
+//		}
+//	}
 	
-	public static void broadcastNodePath(MapNode destinationNode, RobotController rc) throws GameActionException
-	{
-		MapNode targetNode = destinationNode;
-		while (true)
-		{
-			MapNode source = targetNode.parent;
-			
-			if (source == null)
-			{
-				System.out.println("no parent");
-				break;
-			}
-			
-			MapLocation destination = source.getAdjacentLocationIn(targetNode);
-//			System.out.println("connecting " + source.toString());
-//			System.out.println("and " + destination.toString());
-//			System.out.println();
-			broadcastNodeDestinations(source, destination, rc);
-			
-			targetNode = source;
-		}
-	}
+//	public static void broadcastNodePath(MapNode destinationNode, RobotController rc) throws GameActionException
+//	{
+//		MapNode targetNode = destinationNode;
+//		while (true)
+//		{
+//			MapNode source = targetNode.parent;
+//			
+//			if (source == null)
+//			{
+//				System.out.println("no parent");
+//				break;
+//			}
+//			
+//			MapLocation destination = source.getAdjacentLocationIn(targetNode);
+////			System.out.println("connecting " + source.toString());
+////			System.out.println("and " + destination.toString());
+////			System.out.println();
+//			broadcastNodeDestinations(source, destination, rc);
+//			
+//			targetNode = source;
+//		}
+//	}
 	
 	public static void setTeamHQ(MapLocation location, RobotController rc) 
 			throws GameActionException

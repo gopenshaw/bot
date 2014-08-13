@@ -91,13 +91,6 @@ public class HQ {
 		//}
 	}
 
-	private static void broadcastRoute(MapNode route, RobotController rc) 
-			throws GameActionException 
-	{
-		Communication.broadcastNodePath(route, rc);
-		//Communication.setNavigationMode(NavigationMode.MAP_NODES, rc);
-	}
-
 	//--TODO: Must have more intelligent spawn location(s).
 	private static void spawnRobot(RobotController rc)
 			throws GameActionException {

@@ -152,7 +152,7 @@ public class MapLogic
 		int index = node.index;
 		for (int x = node.xLo; x <= node.xHi; x++)
 		{
-			for (int y = node.xLo; y <= node.yHi; y++)
+			for (int y = node.yLo; y <= node.yHi; y++)
 			{
 				Communication.setNodeIndex(index, new MapLocation(x, y), rc);
 			}
@@ -238,6 +238,10 @@ public class MapLogic
 		int nodeIndex = Communication.getNodeThatContains(destination, rc);
 		wasMapped[nodeIndex] = true;
 		MapNode node = nodes[nodeIndex];
+		System.out.println("destination is " + destination.toString());
+		System.out.println("node " + nodeIndex + " contains the destination.");
+		System.out.println(node.toString());
+		System.out.println();
 		Communication.setNodeTarget(nodeIndex, destination, rc);
 		
 		recursiveMap(node, wasMapped, rc);

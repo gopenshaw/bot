@@ -66,25 +66,31 @@ public class MapNode {
 	
 	public MapLocation getAdjacentLocationIn(MapNode node)
 	{
+		MapLocation location;
+		
 		if (this.yLo == node.yHi + 1 && cross(this.xLo, this.xHi, node.xLo, node.xHi))
 		{
 			int x = aveMinRange(this.xLo, node.xLo, this.xHi, node.xHi);
-			return new MapLocation(x, node.yHi);
+			location = new MapLocation(x, node.yHi);
 		}
 		else if (this.yHi == node.yLo - 1 && cross(this.xLo, this.xHi, node.xLo, node.xHi))
 		{
 			int x = aveMinRange(this.xLo, node.xLo, this.xHi, node.xHi);
-			return new MapLocation(x, node.yLo);
+			location = new MapLocation(x, node.yLo);
 		}
 		else if (this.xLo == node.xHi + 1 && cross(this.yLo, this.yHi, node.yLo, node.yHi))
 		{
 			int y = aveMinRange(this.yLo, node.yLo, this.yHi, node.yHi);
-			return new MapLocation(node.xHi, y);
+			location = new MapLocation(node.xHi, y);
 		}
 		else
 		{
 			int y = aveMinRange(this.yLo, node.yLo, this.yHi, node.yHi);
-			return new MapLocation(node.xLo, y);
+			location = new MapLocation(node.xLo, y);
 		}
+		
+		System.out.println("Mapping node " + this.index + " " + this.toString());
+		System.out.println("To node " + node.index + " " + node.toString() + " at " + location.toString());
+		return location;
 	}
 }
