@@ -237,36 +237,44 @@ public class MapLogic
 		throws GameActionException
 	{
 		boolean[] wasMapped = new boolean[nodeCount];
+		MapNode[] nodeQueue = new MapNode[MapNode.MAX_MAP_NODES];
+		
 		int nodeIndex = Communication.getNodeThatContains(destination, rc);
-		wasMapped[nodeIndex] = true;
 		MapNode node = nodes[nodeIndex];
-		System.out.println("destination is " + destination.toString());
-		System.out.println("node " + nodeIndex + " contains the destination.");
-		System.out.println(node.toString());
-		System.out.println();
+		
+		wasMapped[nodeIndex] = true;
+//		System.out.println("destination is " + destination.toString());
+//		System.out.println("node " + nodeIndex + " contains the destination.");
+//		System.out.println(node.toString());
+//		System.out.println();
 		Communication.setNodeTarget(nodeIndex, destination, rc);
 		
-		recursiveMap(node, wasMapped, rc);
-	}
-	
-	private static void recursiveMap(MapNode destination, boolean[] wasMapped, RobotController rc) 
-			throws GameActionException
-	{	
-		//--This method will map all unmapped adjacent nodes to their destination
-		for (int i = 0; i < destination.adjacentCount; i++)
+		int queueIndex = 0;
+		nodeQueue[queueIndex] = node;
+		int queueSize = 1;
+		
+		while (true)
 		{
-			MapNode adjacent = destination.adjacent[i];
-			int index = adjacent.index;
-			if (wasMapped[index])
+			node = nodeQueue[queueIndex++];
+			if (node == null)
 			{
-				continue;
+				return;
 			}
 			
-//			System.out.println("node " + adjacent.index + " is mapped to node " + destination.index);
-			wasMapped[index] = true;
-			MapLocation target = adjacent.getAdjacentLocationIn(destination);
-			Communication.setNodeTarget(index, target, rc);
-			recursiveMap(adjacent, wasMapped, rc);
+			for (int i = 0; i < node.adjacentCount; i++)
+			{
+				MapNode adjacent = node.adjacent[i];
+				int index = adjacent.index;
+				if (wasMapped[index])
+				{
+					continue;
+				}
+				wasMapped[index] = true;
+				
+				MapLocation target = adjacent.getAdjacentLocationIn(node);
+				Communication.setNodeTarget(index, target, rc);
+				nodeQueue[queueSize++] = adjacent;
+			}
 		}
 	}
 }

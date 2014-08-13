@@ -3,7 +3,7 @@ package bot;
 import battlecode.common.*;
 
 public class MapNode {
-	public final static int MAX_MAP_NODES = 1000;
+	public final static int MAX_MAP_NODES = 200;
 	public final static int MAX_ADJACENT_NODES = 100;
 	
 	int index;
@@ -89,8 +89,8 @@ public class MapNode {
 			location = new MapLocation(node.xLo, y);
 		}
 		
-		System.out.println("Mapping node " + this.index + " " + this.toString());
-		System.out.println("To node " + node.index + " " + node.toString() + " at " + location.toString());
+//		System.out.println("Mapping node " + this.index + " " + this.toString());
+//		System.out.println("To node " + node.index + " " + node.toString() + " at " + location.toString());
 		return location;
 	}
 }
