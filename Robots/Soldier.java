@@ -32,7 +32,7 @@ public class Soldier {
 					Robot[] nearbyEnemies = rc.senseNearbyGameObjects(
 							Robot.class, 10, rc.getTeam().opponent());
 					
-					if (false && nearbyEnemies.length > 0)
+					if (nearbyEnemies.length > 0)
 					{
 						defendFrom(nearbyEnemies, rc);
 					}
