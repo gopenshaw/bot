@@ -6,8 +6,8 @@ public class MapLogic
 {
 	private final static int NOT_SET_VALUE = -1;
 	public static int nodeCount;
-	private static int mapWidth = NOT_SET_VALUE;
-	private static int mapHeight = NOT_SET_VALUE;
+	private static int mapWidth;
+	private static int mapHeight;
 	private static TerrainTile[][] map;
 	private static MapNode[] nodes = new MapNode[MapNode.MAX_MAP_NODES];
 	
@@ -19,12 +19,6 @@ public class MapLogic
 	private static MapLocation calculatePastrLocation(RobotController rc) 
 			throws GameActionException
 	{
-		if (mapWidth == NOT_SET_VALUE
-			|| mapHeight == NOT_SET_VALUE)
-		{
-			mapWidth = rc.getMapWidth();
-			mapHeight = rc.getMapHeight();
-		}
 		
 		MapLocation enemyHQ = rc.senseEnemyHQLocation();
 		final double[][] cowGrowth = rc.senseCowGrowth();
@@ -88,16 +82,12 @@ public class MapLogic
 				+ new MapLocation(x, y).distanceSquaredTo(enemyHQ) * DISTANCE_FROM_ENEMY_WEIGHT;
 	}
 	
-	private static TerrainTile[][] getMap(RobotController rc)
+	public static void buildMap(RobotController rc)
 	{
-		if (mapWidth == NOT_SET_VALUE
-				|| mapHeight == NOT_SET_VALUE)
-		{
-			mapWidth = rc.getMapWidth();
-			mapHeight = rc.getMapHeight();
-		}
+		mapWidth = rc.getMapWidth();
+		mapHeight = rc.getMapHeight();
 		
-		TerrainTile[][] map = new TerrainTile[mapWidth][mapHeight];
+		map = new TerrainTile[mapWidth][mapHeight];
 		
 		for (int i = 0; i < mapWidth; i++)
 		{
@@ -106,18 +96,10 @@ public class MapLogic
 				map[i][j] = rc.senseTerrainTile(new MapLocation(i, j));
 			}
 		}
-		
-		return map;
 	}
 	
 	public static boolean coarsenMap(RobotController rc) throws GameActionException
 	{
-		if (map == null)
-		{
-			map = getMap(rc);
-		}
-		
-		System.out.println("index grid set");
 		boolean[][] squareCounted = new boolean[mapWidth][mapHeight];
 		
 		for (int i = 0; i < mapWidth; i++)

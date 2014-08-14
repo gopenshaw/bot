@@ -15,6 +15,8 @@ public class HQ {
 	public static void run(RobotController rc)
 	{
 		int calculationPhase = 0;
+		Clock.getBytecodesLeft();
+		
 		while (true)
 		{
 			try
@@ -25,12 +27,16 @@ public class HQ {
 				switch (calculationPhase)
 				{
 				case 1:
-					coarsenSucceeded = MapLogic.coarsenMap(rc);
+					MapLogic.buildMap(rc);
 					rc.setIndicatorString(0, "calc 1 complete.");
 					break;
 				case 2:
-					MapLogic.markNodeIndexOnGrid(rc);
+					coarsenSucceeded = MapLogic.coarsenMap(rc);
 					rc.setIndicatorString(0, "calc 2 complete.");
+					break;
+				case 3:
+					MapLogic.markNodeIndexOnGrid(rc);
+					rc.setIndicatorString(0, "calc 3 complete.");
 					break;
 				}
 				
