@@ -9,6 +9,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import bot.Communication;
 import bot.MovementLogic;
+import bot.Enums.PointOfInterest;
 import bot.Enums.Status;
 import bot.Enums.Tactic;
 
@@ -35,7 +36,9 @@ public class Soldier {
 					Robot[] nearbyEnemies = rc.senseNearbyGameObjects(
 							Robot.class, 10, rc.getTeam().opponent());
 					
-					if (nearbyEnemies.length > 0)
+					if (nearbyEnemies.length > 0
+						&& !(nearbyEnemies.length != 1
+						&& rc.senseRobotInfo(nearbyEnemies[0]).type == RobotType.HQ))
 					{
 						defendFrom(nearbyEnemies, rc);
 					}
@@ -46,9 +49,10 @@ public class Soldier {
 						{
 						case BUILD_PASTR: buildPastr(navigation, rc);
 							break;
-//						case DESTROY_PASTR: destroyPastr(navigation, rc);
-//							break;
+						case DESTROY_PASTR: destroyPastr(navigation, rc);
+							break;
 						case RALLY: rally(navigation, rc);
+							break;
 						}
 					}
 					
@@ -66,7 +70,7 @@ public class Soldier {
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "build pastr");
-		MapLocation destination = Communication.getPastrLocation(rc);
+		MapLocation destination = Communication.getPointOfInterest(PointOfInterest.Team_Pastr, rc);
 		MapLocation currentLocation = rc.getLocation();
 		if (currentLocation.distanceSquaredTo(destination) < CLOSE_ENOUGH_DISTANCE)
 		{
@@ -87,23 +91,7 @@ public class Soldier {
 		}
 		else
 		{
-			navigation.moveToward(destination, rc);
-		}
-	}
-	
-	private void controlCenter(MovementLogic navigation, RobotController rc) 
-			throws GameActionException
-	{
-		if (MAP_CENTER == null)
-		{
-			MAP_CENTER = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
-		}
-		
-		rc.setIndicatorString(0, "control center");
-		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(MAP_CENTER) > CLOSE_ENOUGH_DISTANCE)
-		{
-			navigation.moveToward(MAP_CENTER, rc);
+			navigation.moveToward(PointOfInterest.Team_Pastr, rc);
 		}
 	}
 	
@@ -111,17 +99,11 @@ public class Soldier {
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "rally");
-		MapLocation destination = Communication.getRallyPoint(rc);
-		if (destination == NOT_SET)
-		{
-			destination = MAP_CENTER;
-			rc.setIndicatorString(0, "rally center");
-		}
-
+		MapLocation destination = Communication.getPointOfInterest(PointOfInterest.Rally_Point, rc);
 		MapLocation currentLocation = rc.getLocation();
 		if (currentLocation.distanceSquaredTo(destination) > CLOSE_ENOUGH_DISTANCE)
 		{
-			navigation.moveToward(destination, rc);
+			navigation.moveToward(PointOfInterest.Rally_Point, rc);
 		}
 	}
 	
@@ -129,7 +111,7 @@ public class Soldier {
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "destroy pastr");
-		navigation.moveToward(Communication.getEnemyPastrLocation(rc), rc);
+		navigation.moveToward(PointOfInterest.Enemy_Pastr, rc);
 	}
 	
 	private void defendFrom(Robot[] nearbyEnemies, RobotController rc) 

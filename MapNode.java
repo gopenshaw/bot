@@ -5,6 +5,7 @@ import battlecode.common.*;
 public class MapNode {
 	public final static int MAX_MAP_NODES = 200;
 	public final static int MAX_ADJACENT_NODES = 100;
+	public final static int NODE_NOT_SET = 0;
 	
 	int index;
 	int yLo;

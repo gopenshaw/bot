@@ -1,7 +1,10 @@
 package bot;
 
-import battlecode.common.*;
-import bot.Enums.NavigationMode;
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import bot.Enums.PointOfInterest;
 
 public class MovementLogic {
 	private MapLocation destination;
@@ -19,33 +22,39 @@ public class MovementLogic {
 	//if the distance to the destination from the corners of an obstacle are never
 	//shorter than the initial distance when the robot first hit the obstacle.
 	//--TODO: There are a few ways that this bug movement algorithm could be optimized..
-	public void moveToward(MapLocation destination, RobotController rc) 
+	public void moveToward(PointOfInterest poi, RobotController rc) 
 			throws GameActionException
 	{
-		//--TODO: Instead of checking a mode, see if the information is available
-//		if (Communication.GetNavigationMode(rc) == NavigationMode.MAP_NODES)
-//		{
-//			MapLocation currentLocation = rc.getLocation();
-//			MapLocation segmentDestination = Communication.getDestinationFrom(currentLocation, rc);
-//			
-//			Direction direction = currentLocation.directionTo(segmentDestination);
-//			
-//			if (rc.canMove(direction))
-//			{
-//				rc.move(direction);
-//			}
-//			else if (rc.canMove(direction.rotateRight()))
-//			{
-//				rc.move(direction.rotateRight());
-//			}
-//			else if (rc.canMove(direction.rotateLeft()))
-//			{
-//				rc.move(direction.rotateLeft());
-//			}
-//			
-//			return;
-//		}
+		MapLocation currentLocation = rc.getLocation();
+		MapLocation segmentDestination = Communication.getNodeDestination(poi, currentLocation, rc);
+		if (segmentDestination == null)
+		{
+			MapLocation destination = Communication.getPointOfInterest(poi, rc);
+			this.moveToward(destination, rc);
+			return;
+		}
 		
+		rc.setIndicatorString(0, "going to: " + segmentDestination.toString());
+		Direction direction = currentLocation.directionTo(segmentDestination);
+		
+		if (rc.canMove(direction))
+		{
+			rc.move(direction);
+		}
+		else if (rc.canMove(direction.rotateRight()))
+		{
+			rc.move(direction.rotateRight());
+		}
+		else if (rc.canMove(direction.rotateLeft()))
+		{
+			rc.move(direction.rotateLeft());
+		}
+		
+		return;
+	}
+	
+	public void moveToward(MapLocation destination, RobotController rc) throws GameActionException
+	{
 		//--If the robot was following a wall but there is a new destination,
 		//this will force the robot to recalculate its distance from the destination
 		//so it does not get stuck on a wall

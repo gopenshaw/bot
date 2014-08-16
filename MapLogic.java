@@ -3,38 +3,18 @@ package bot;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import bot.Enums.PointOfInterest;
 
 public class MapLogic 
 {
 	private final Map MAP;
-	public static int nodeCount;
-	private static MapNode[] nodes = new MapNode[MapNode.MAX_MAP_NODES];
+	public MapLocation teamPastrLocation;
 	
 	public MapLogic(Map map) {
 		this.MAP = map;
 	}
 	
-	public int getNodeCount()
-	{
-		return nodeCount;
-	}
-	
-	public void broadcastImportantLocation(RobotController rc) throws GameActionException
-	{
-		MapLocation pastrLocation = calculatePastrLocation(rc);
-		MapLocation rallyPoint = getMidpoint(rc.senseHQLocation(), pastrLocation);
-		Communication.setPastrLocation(pastrLocation, rc);
-		Communication.setRallyPoint(rallyPoint, rc);
-	}
-	
-	private MapLocation getMidpoint(MapLocation a, MapLocation b)
-	{
-		int x = (a.x + b.x) / 2;
-		int y = (a.y + b.y) / 2;
-		return new MapLocation(x, y);
-	}
-	
-	private MapLocation calculatePastrLocation(RobotController rc) 
+	public void calculateTeamPastrLocation(RobotController rc) 
 			throws GameActionException
 	{
 		MapLocation enemyHQ = rc.senseEnemyHQLocation();
@@ -63,7 +43,8 @@ public class MapLogic
 			}
 		}
 		
-		return new MapLocation(xMax, yMax);
+		teamPastrLocation = new MapLocation(xMax, yMax);
+		Communication.setPointOfInterest(PointOfInterest.Team_Pastr, teamPastrLocation, rc);
 	}
 	
 	private boolean adjacentSquaresAreNonZero(double[][] cowGrowth, int x, int y)
@@ -97,66 +78,5 @@ public class MapLogic
 		final double DISTANCE_FROM_ENEMY_WEIGHT = 0.01;
 		return cowGrowth * COW_GROWTH_WEIGHT
 				+ new MapLocation(x, y).distanceSquaredTo(enemyHQ) * DISTANCE_FROM_ENEMY_WEIGHT;
-	}
-	
-	public void markNodeIndexOnGrid(RobotController rc) 
-			throws GameActionException
-	{
-		for (int i = 0; i < nodeCount; i++)
-		{
-			MapNode node = nodes[i];
-			for (int x = node.xLo; x <= node.xHi; x++)
-			{
-				for (int y = node.yLo; y <= node.yHi; y++)
-				{
-					Communication.setNodeIndex(i, new MapLocation(x, y), rc);
-				}
-			}
-		}
-	}
-	
-	public static void createMapTo(MapLocation destination, RobotController rc) 
-		throws GameActionException
-	{
-		boolean[] wasMapped = new boolean[nodeCount];
-		MapNode[] nodeQueue = new MapNode[MapNode.MAX_MAP_NODES];
-		
-		int nodeIndex = Communication.getNodeThatContains(destination, rc);
-		MapNode node = nodes[nodeIndex];
-		
-		wasMapped[nodeIndex] = true;
-//		System.out.println("destination is " + destination.toString());
-//		System.out.println("node " + nodeIndex + " contains the destination.");
-//		System.out.println(node.toString());
-//		System.out.println();
-		Communication.setNodeTarget(nodeIndex, destination, rc);
-		
-		int queueIndex = 0;
-		nodeQueue[queueIndex] = node;
-		int queueSize = 1;
-		
-		while (true)
-		{
-			node = nodeQueue[queueIndex++];
-			if (node == null)
-			{
-				return;
-			}
-			
-			for (int i = 0; i < node.adjacentCount; i++)
-			{
-				MapNode adjacent = node.adjacent[i];
-				int index = adjacent.index;
-				if (wasMapped[index])
-				{
-					continue;
-				}
-				wasMapped[index] = true;
-				
-				MapLocation target = adjacent.getAdjacentLocationIn(node);
-				Communication.setNodeTarget(index, target, rc);
-				nodeQueue[queueSize++] = adjacent;
-			}
-		}
 	}
 }
