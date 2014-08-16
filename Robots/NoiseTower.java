@@ -27,22 +27,10 @@ public class NoiseTower
 		while (true)
 		{
 			try
-			{
-				if (Communication.getPastrBuildingStatus(rc) == Status.COMPLETED
-					&& rc.sensePastrLocations(rc.getTeam()).length == 0)
-				{
-					Communication.setPastrBuildingStatus(Status.NOT_SET, rc);
-				}
-			} 
-			catch (GameActionException e1)
-			{
-				e1.printStackTrace();
-			}
-			
-			try
-			{
+			{	
 				for (int i = 0; i < 4; i++)
 				{
+					Communication.setNoiseTowerLifeSignal(Clock.getRoundNum(), rc);
 					for (int j = 0; j < NUMBER_OF_STEPS; j++)
 					{
 						for (int k = 0; k < STEP_HOLD; k++)

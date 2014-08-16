@@ -75,7 +75,7 @@ public class MapLogic
 	private double calculatePastrValue(int x, int y, double cowGrowth, MapLocation enemyHQ)
 	{
 		final double COW_GROWTH_WEIGHT = 1000;
-		final double DISTANCE_FROM_ENEMY_WEIGHT = 0.01;
+		final double DISTANCE_FROM_ENEMY_WEIGHT = 0.85;
 		return cowGrowth * COW_GROWTH_WEIGHT
 				+ new MapLocation(x, y).distanceSquaredTo(enemyHQ) * DISTANCE_FROM_ENEMY_WEIGHT;
 	}

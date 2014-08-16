@@ -5,5 +5,4 @@ public enum Status {
 	IN_PROGRESS,
 	COMPLETED,
 	ABORTED,
-	DESTROYED
 }

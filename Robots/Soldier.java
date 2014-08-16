@@ -83,12 +83,16 @@ public class Soldier {
 				Communication.setNoiseTowerBuildingStatus(Status.IN_PROGRESS, rc);
 			}
 			else if (pastrStatus == Status.NOT_SET
-					&& noiseTowerStatus == Status.COMPLETED
+					&& noiseTowerStatus == Status.IN_PROGRESS
 					&& distance <= FARM_CLOSE_ENOUGH_DISTANCE
 					&& rc.getHealth() > 70)
 			{
 				rc.construct(RobotType.PASTR);
 				Communication.setPastrBuildingStatus(Status.IN_PROGRESS, rc);
+			}
+			else
+			{
+				navigation.moveToward(PointOfInterest.Team_Pastr, rc);
 			}
 		}
 		else

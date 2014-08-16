@@ -1,5 +1,7 @@
 package bot.Robots;
 
+import java.util.Arrays;
+
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -22,10 +24,11 @@ public class HQ
 	private MapLocation enemyPastr;
 	private int previousRoundNumber;
 	private boolean coarsenComplete;
-	public static final int TACTIC_INDICATOR_INDEX = 0;
+	private boolean[] canSpawnHere = new boolean[8];
 
 	public void run(RobotController rc)
 	{
+		Arrays.fill(canSpawnHere, true);
 		int hqStep = 1;
 		MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
 
@@ -93,6 +96,24 @@ public class HQ
 	{
 		MapLocation[] enemyPastrLocations = rc.sensePastrLocations(rc.getTeam()
 				.opponent());
+		
+		if (Communication.getNoiseTowerBuildingStatus(rc) == Status.COMPLETED)
+		{
+			int signal = Communication.getNoiseTowerLifeSignal(rc);
+			int currentRound = Clock.getRoundNum();
+			if ((currentRound - signal) > 10)
+			{
+				System.out.println("!!" + signal + " " + Clock.getRoundNum());
+				Communication.setNoiseTowerBuildingStatus(Status.NOT_SET, rc);
+			}
+		}
+		
+		if (Communication.getPastrBuildingStatus(rc) == Status.COMPLETED
+			&& rc.sensePastrLocations(rc.getTeam()).length == 0)
+		{
+			
+			Communication.setPastrBuildingStatus(Status.NOT_SET, rc);
+		}
 
 		int currentEnemyPastrCount = enemyPastrLocations.length;
 
@@ -110,28 +131,39 @@ public class HQ
 				map.createMapTo(PointOfInterest.Enemy_Pastr,
 						enemyPastrLocations[0], rc);
 			}
-		} else if (enemyPastrDestroyed)
+		} 
+		else if (enemyPastrDestroyed)
 		{
 			enemyPastr = null;
 			Communication.setTactic(Tactic.BUILD_PASTR, rc);
 		}
+		else if (Clock.getRoundNum() > 1100)
+		{
+			Communication.setTactic(Tactic.BUILD_PASTR, rc);
+		}
 	}
 
-	// --TODO: Must have more intelligent spawn location(s).
-	private static double spawnRobot(RobotController rc)
-			throws GameActionException
+	private double spawnRobot(RobotController rc)
 	{
 		if (rc.isActive() && rc.senseRobotCount() < 25)
 		{
-			Direction toEnemy = rc.getLocation().directionTo(
-					rc.senseEnemyHQLocation());
-			if (rc.senseObjectAtLocation(rc.getLocation().add(toEnemy)) == null)
+			for (int i = 0; i < 8; i++)
 			{
-				rc.spawn(toEnemy);
-				return Clock.getRoundNum()
-						+ GameConstants.HQ_SPAWN_DELAY_CONSTANT_1
-						+ (rc.senseRobotCount() + 1)
-						* GameConstants.HQ_SPAWN_DELAY_CONSTANT_2;
+				if (canSpawnHere[i])
+				{
+					try
+					{
+						rc.spawn(Direction.values()[i]);
+						return Clock.getRoundNum()
+								+ GameConstants.HQ_SPAWN_DELAY_CONSTANT_1
+								+ (rc.senseRobotCount() + 1)
+								* GameConstants.HQ_SPAWN_DELAY_CONSTANT_2;
+					} 
+					catch (GameActionException e)
+					{
+						canSpawnHere[i] = false;
+					}
+				}
 			}
 		}
 

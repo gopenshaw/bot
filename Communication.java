@@ -12,9 +12,23 @@ public class Communication {
 	private final static int NOISE_TOWER_STATUS_CHANNEL = 10005;
 
 	private final static int TACTIC_CHANNEL = 10007;
+	private final static int PASTR_LIFE_SIGNAL_CHANNEL = 10008;
 	
 	private final static int NODE_MAPS_BEGINNING_CHANNEL = 20000;
 	private final static int NODE_MAP_SIZE = MapNode.MAX_MAP_NODES;
+	
+	public static int getNoiseTowerLifeSignal(RobotController rc) 
+			throws GameActionException
+	{
+		return rc.readBroadcast(PASTR_LIFE_SIGNAL_CHANNEL);
+	}
+	
+	public static void setNoiseTowerLifeSignal(int signal, RobotController rc) 
+			throws GameActionException
+	{
+		System.out.println(signal);
+		rc.broadcast(PASTR_LIFE_SIGNAL_CHANNEL, signal);
+	}
 	
 	public static MapLocation getNodeDestination(PointOfInterest poi, MapLocation currentLocation, RobotController rc) 
 			throws GameActionException
@@ -55,7 +69,6 @@ public class Communication {
 	public static void setTactic(
 			Tactic tactic, RobotController rc) throws GameActionException
 	{
-		rc.setIndicatorString(HQ.TACTIC_INDICATOR_INDEX, "tactic set: " + tactic);
 		rc.broadcast(TACTIC_CHANNEL, tactic.ordinal());
 	}
 	
