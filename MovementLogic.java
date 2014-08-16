@@ -7,6 +7,7 @@ import battlecode.common.RobotController;
 import bot.Enums.PointOfInterest;
 
 public class MovementLogic {
+	private final int FARM_SNEAK_DISTANCE = 50;
 	private MapLocation destination;
 	private Direction currentDirection;
 	private boolean followingWall;
@@ -22,7 +23,7 @@ public class MovementLogic {
 	//if the distance to the destination from the corners of an obstacle are never
 	//shorter than the initial distance when the robot first hit the obstacle.
 	//--TODO: There are a few ways that this bug movement algorithm could be optimized..
-	public void moveToward(PointOfInterest poi, boolean sneak, RobotController rc) 
+	public void moveToward(PointOfInterest poi, RobotController rc) 
 			throws GameActionException
 	{
 		MapLocation currentLocation = rc.getLocation();
@@ -30,7 +31,7 @@ public class MovementLogic {
 		if (segmentDestination == null)
 		{
 			MapLocation destination = Communication.getPointOfInterest(poi, rc);
-			this.moveToward(destination, sneak, rc);
+			this.moveToward(destination, rc);
 			return;
 		}
 		
@@ -39,21 +40,21 @@ public class MovementLogic {
 		
 		if (rc.canMove(direction))
 		{
-			sneakIfTrueElseMove(direction, sneak, rc);
+			moveOrSneak(direction, currentLocation, rc);
 		}
 		else if (rc.canMove(direction.rotateRight()))
 		{
-			sneakIfTrueElseMove(direction.rotateRight(), sneak, rc);
+			moveOrSneak(direction.rotateRight(), currentLocation, rc);
 		}
 		else if (rc.canMove(direction.rotateLeft()))
 		{
-			sneakIfTrueElseMove(direction.rotateLeft(), sneak, rc);
+			moveOrSneak(direction.rotateLeft(), currentLocation, rc);
 		}
 		
 		return;
 	}
 	
-	public void moveToward(MapLocation destination, boolean sneak, RobotController rc) throws GameActionException
+	public void moveToward(MapLocation destination, RobotController rc) throws GameActionException
 	{
 		//--If the robot was following a wall but there is a new destination,
 		//this will force the robot to recalculate its distance from the destination
@@ -77,7 +78,7 @@ public class MovementLogic {
 			
 			if (rc.canMove(direction))
 			{
-				sneakIfTrueElseMove(direction, sneak, rc);
+				moveOrSneak(direction, locationBeforeMove, rc);
 				this.currentDirection = direction;
 				return;
 			}
@@ -98,12 +99,11 @@ public class MovementLogic {
 				turnLeft(rc, this.currentDirection.rotateRight().rotateRight()):
 				turnRight(rc, this.currentDirection.rotateLeft().rotateLeft());
 				
-		sneakIfTrueElseMove(this.currentDirection, sneak, rc);
+		moveOrSneak(this.currentDirection, locationBeforeMove, rc);
 		
 		//--If the robot normally turns left but turned right, or normally
 		//turns right but has turned left, then it just rounded an exterior
 		//corner
-		
 		boolean roundedCorner = turningLeft ?
 				(this.currentDirection == oldDirection.rotateRight()
 				|| this.currentDirection == oldDirection.rotateRight().rotateRight()) :
@@ -111,6 +111,8 @@ public class MovementLogic {
 				|| this.currentDirection == oldDirection.rotateLeft().rotateLeft());		
 		if (roundedCorner)
 		{
+			//--TODO: This is probably the same as location before move
+			//according to how turns progress
 			MapLocation locationAfterMove = rc.getLocation();
 			int currentDistance = locationAfterMove.distanceSquaredTo(destination);
 			if (currentDistance < this.initialDistanceToDestAtWall)
@@ -120,10 +122,12 @@ public class MovementLogic {
 		}
 	}
 	
-	private void sneakIfTrueElseMove(Direction direction, boolean sneak, RobotController rc) 
+	private void moveOrSneak(Direction direction, MapLocation currentLocation, RobotController rc) 
 			throws GameActionException
 	{
-		if (sneak)
+		MapLocation farm = Communication.getPointOfInterest(PointOfInterest.Team_Pastr, rc);
+		int distanceToDestination = currentLocation.distanceSquaredTo(farm);
+		if (distanceToDestination <= FARM_SNEAK_DISTANCE)
 		{
 			rc.sneak(direction);
 		}

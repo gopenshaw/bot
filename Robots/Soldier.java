@@ -21,9 +21,6 @@ public class Soldier {
 	final int SELF_DESTRUCT_WALK_STEPS = 2;
 	final int SOLDIER_CLOSE_ENOUGH_DISTANCE = 3;
 	final int FARM_CLOSE_ENOUGH_DISTANCE = 1;
-	final int FARM_SNEAK_DISTANCE = 50;
-	
-	private boolean sneak;
 	
 	public void run(RobotController rc)
 	{
@@ -75,7 +72,6 @@ public class Soldier {
 		MapLocation currentLocation = rc.getLocation();
 		
 		int distance = currentLocation.distanceSquaredTo(destination);
-		sneak = (distance <= FARM_SNEAK_DISTANCE);
 		
 		if (distance <= SOLDIER_CLOSE_ENOUGH_DISTANCE)
 		{
@@ -98,8 +94,7 @@ public class Soldier {
 		}
 		else
 		{
-			navigation.moveToward(PointOfInterest.Team_Pastr, sneak, rc);
-			sneak = false;
+			navigation.moveToward(PointOfInterest.Team_Pastr, rc);
 		}
 	}
 	
@@ -111,7 +106,7 @@ public class Soldier {
 		MapLocation currentLocation = rc.getLocation();
 		if (currentLocation.distanceSquaredTo(destination) > SOLDIER_CLOSE_ENOUGH_DISTANCE)
 		{
-			navigation.moveToward(PointOfInterest.Rally_Point, false, rc);
+			navigation.moveToward(PointOfInterest.Rally_Point, rc);
 		}
 	}
 	
@@ -119,7 +114,7 @@ public class Soldier {
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "destroy pastr");
-		navigation.moveToward(PointOfInterest.Enemy_Pastr, false, rc);
+		navigation.moveToward(PointOfInterest.Enemy_Pastr, rc);
 	}
 	
 	private void defendFrom(Robot[] nearbyEnemies, RobotController rc) 
