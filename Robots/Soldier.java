@@ -9,18 +9,20 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import bot.Communication;
 import bot.MovementLogic;
-import bot.Enums.ConstructionStatus;
+import bot.Enums.Status;
 import bot.Enums.Tactic;
 
 public class Soldier {
 	
 	//--Soldier self destruct
-	final static int SELF_DESTRUCT_HEALTH_THRESHOLD = 38;
-	final static int SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD = 3;
-	final static int SELF_DESTRUCT_WALK_STEPS = 2;
-	final static int CLOSE_ENOUGH_DISTANCE = 3;
+	final int SELF_DESTRUCT_HEALTH_THRESHOLD = 38;
+	final int SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD = 3;
+	final int SELF_DESTRUCT_WALK_STEPS = 2;
+	final int CLOSE_ENOUGH_DISTANCE = 3;
 	
-	public static void run(RobotController rc)
+	private MapLocation MAP_CENTER;
+	
+	public void run(RobotController rc)
 	{
 		MovementLogic navigation = new MovementLogic(rc.getRobot().getID());
 		
@@ -41,13 +43,15 @@ public class Soldier {
 						Tactic tactic = Communication.getTactic(rc);
 						switch (tactic)
 						{
-						case BUILD_PASTR: buildPastr(navigation, rc);
-							break;
+//						case BUILD_PASTR: buildPastr(navigation, rc);
+//							break;
 						case CONTROL_CENTER: controlCenter(navigation, rc);
 							break;
-						case DESTROY_PASTR: destroyPastr(navigation, rc);
+//						case DESTROY_PASTR: destroyPastr(navigation, rc);
+//							break;
+//						case RALLY: rally(navigation, rc);
+						default:
 							break;
-						case RALLY: rally(navigation, rc);
 						}
 					}
 					
@@ -61,52 +65,57 @@ public class Soldier {
 		}
 	}
 	
-	private static void buildPastr(MovementLogic navigation, RobotController rc) 
-			throws GameActionException
-	{
-		rc.setIndicatorString(0, "build pastr");
-		MapLocation destination = Communication.getRallyPoint(rc);
-		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(destination) < CLOSE_ENOUGH_DISTANCE)
-		{
-			ConstructionStatus pastrStatus = Communication.getPastrBuildingStatus(rc);
-			ConstructionStatus noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
-			
-			if (noiseTowerStatus == ConstructionStatus.NOT_SET)
-			{
-				rc.construct(RobotType.NOISETOWER);
-				Communication.setNoiseTowerBuildingStatus(ConstructionStatus.BUILDING, rc);
-			}
-			else if (pastrStatus == ConstructionStatus.NOT_SET
-					&& noiseTowerStatus == ConstructionStatus.COMPLETED)
-			{
-				rc.construct(RobotType.PASTR);
-				Communication.setPastrBuildingStatus(ConstructionStatus.BUILDING, rc);
-			}
-		}
-		else
-		{
-			navigation.moveToward(destination, rc);
-		}
-	}
+//	private static void buildPastr(MovementLogic navigation, RobotController rc) 
+//			throws GameActionException
+//	{
+//		rc.setIndicatorString(0, "build pastr");
+//		MapLocation destination = Communication.getRallyPoint(rc);
+//		MapLocation currentLocation = rc.getLocation();
+//		if (currentLocation.distanceSquaredTo(destination) < CLOSE_ENOUGH_DISTANCE)
+//		{
+//			Status pastrStatus = Communication.getPastrBuildingStatus(rc);
+//			Status noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
+//			
+//			if (noiseTowerStatus == Status.NOT_SET)
+//			{
+//				rc.construct(RobotType.NOISETOWER);
+//				Communication.setNoiseTowerBuildingStatus(Status.IN_PROGRESS, rc);
+//			}
+//			else if (pastrStatus == Status.NOT_SET
+//					&& noiseTowerStatus == Status.COMPLETED)
+//			{
+//				rc.construct(RobotType.PASTR);
+//				Communication.setPastrBuildingStatus(Status.IN_PROGRESS, rc);
+//			}
+//		}
+//		else
+//		{
+//			navigation.moveToward(destination, rc);
+//		}
+//	}
 	
-	private static void controlCenter(MovementLogic navigation, RobotController rc) 
+	private void controlCenter(MovementLogic navigation, RobotController rc) 
 			throws GameActionException
 	{
+		if (MAP_CENTER == null)
+		{
+			MAP_CENTER = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
+		}
+		
 		rc.setIndicatorString(0, "control center");
-		MapLocation destination = Communication.getMapCenter(rc);
 		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(destination) > CLOSE_ENOUGH_DISTANCE)
+		if (currentLocation.distanceSquaredTo(MAP_CENTER) > CLOSE_ENOUGH_DISTANCE)
 		{
-			navigation.moveToward(destination, rc);
+			navigation.moveToward(MAP_CENTER, rc);
 		}
 	}
 	
-	private static void rally(MovementLogic navigation, RobotController rc) 
+	private void rally(MovementLogic navigation, RobotController rc) 
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "rally");
-		MapLocation destination = Communication.getRallyPoint(rc);
+//		MapLocation destination = Communication.getRallyPoint(rc);
+		MapLocation destination = null;
 		MapLocation currentLocation = rc.getLocation();
 		if (currentLocation.distanceSquaredTo(destination) > CLOSE_ENOUGH_DISTANCE)
 		{
@@ -114,14 +123,14 @@ public class Soldier {
 		}
 	}
 	
-	private static void destroyPastr(MovementLogic navigation, RobotController rc)
+	private void destroyPastr(MovementLogic navigation, RobotController rc)
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "destroy pastr");
 		navigation.moveToward(Communication.getEnemyPastrLocation(rc), rc);
 	}
 	
-	private static void defendFrom(Robot[] nearbyEnemies, RobotController rc) 
+	private void defendFrom(Robot[] nearbyEnemies, RobotController rc) 
 			throws GameActionException
 	{
 		if (nearbyEnemies.length >= SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD
@@ -136,7 +145,7 @@ public class Soldier {
 		}
 	}
 	
-	private static void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
+	private void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
 			throws GameActionException {
 		for (int i = 0; i < nearbyEnemies.length; i++)
 		{
@@ -149,7 +158,7 @@ public class Soldier {
 		}
 	}
 
-	private static void initiateSelfDestruct(RobotController rc,
+	private void initiateSelfDestruct(RobotController rc,
 			Robot[] nearbyEnemies) throws GameActionException {
 		rc.setIndicatorString(0, "Self-destruct engaged.");
 		for (int i = 0; i < SELF_DESTRUCT_WALK_STEPS; i++)

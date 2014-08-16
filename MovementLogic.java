@@ -22,28 +22,29 @@ public class MovementLogic {
 	public void moveToward(MapLocation destination, RobotController rc) 
 			throws GameActionException
 	{
-		if (Communication.GetNavigationMode(rc) == NavigationMode.MAP_NODES)
-		{
-			MapLocation currentLocation = rc.getLocation();
-			MapLocation segmentDestination = Communication.getDestinationFrom(currentLocation, rc);
-			
-			Direction direction = currentLocation.directionTo(segmentDestination);
-			
-			if (rc.canMove(direction))
-			{
-				rc.move(direction);
-			}
-			else if (rc.canMove(direction.rotateRight()))
-			{
-				rc.move(direction.rotateRight());
-			}
-			else if (rc.canMove(direction.rotateLeft()))
-			{
-				rc.move(direction.rotateLeft());
-			}
-			
-			return;
-		}
+		//--TODO: Instead of checking a mode, see if the information is available
+//		if (Communication.GetNavigationMode(rc) == NavigationMode.MAP_NODES)
+//		{
+//			MapLocation currentLocation = rc.getLocation();
+//			MapLocation segmentDestination = Communication.getDestinationFrom(currentLocation, rc);
+//			
+//			Direction direction = currentLocation.directionTo(segmentDestination);
+//			
+//			if (rc.canMove(direction))
+//			{
+//				rc.move(direction);
+//			}
+//			else if (rc.canMove(direction.rotateRight()))
+//			{
+//				rc.move(direction.rotateRight());
+//			}
+//			else if (rc.canMove(direction.rotateLeft()))
+//			{
+//				rc.move(direction.rotateLeft());
+//			}
+//			
+//			return;
+//		}
 		
 		//--If the robot was following a wall but there is a new destination,
 		//this will force the robot to recalculate its distance from the destination

@@ -2,7 +2,7 @@ package bot.Robots;
 
 import battlecode.common.*;
 import bot.Communication;
-import bot.Enums.ConstructionStatus;
+import bot.Enums.Status;
 
 public class NoiseTower 
 {
@@ -13,7 +13,7 @@ public class NoiseTower
 	{
 		try 
 		{
-			Communication.setNoiseTowerBuildingStatus(ConstructionStatus.COMPLETED, rc);
+			Communication.setNoiseTowerBuildingStatus(Status.COMPLETED, rc);
 		} 
 		catch (GameActionException e) 
 		{

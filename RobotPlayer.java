@@ -15,11 +15,11 @@ public class RobotPlayer {
 		
 		if (rc.getType() == RobotType.SOLDIER)
 		{
-			Soldier.run(rc);
+			new Soldier().run(rc);
 		}
 		else if (rc.getType() == RobotType.HQ)
 		{
-			HQ.run(rc);
+			new HQ().run(rc);
 		}
 		else if (rc.getType() == RobotType.PASTR)
 		{

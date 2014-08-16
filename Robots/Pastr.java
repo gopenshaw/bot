@@ -2,7 +2,7 @@ package bot.Robots;
 
 import battlecode.common.*;
 import bot.Communication;
-import bot.Enums.ConstructionStatus;
+import bot.Enums.Status;
 
 public class Pastr 
 {
@@ -10,7 +10,7 @@ public class Pastr
 	{
 		try
 		{
-			Communication.setPastrBuildingStatus(ConstructionStatus.COMPLETED, rc);
+			Communication.setPastrBuildingStatus(Status.COMPLETED, rc);
 			while (true)
 			{
 				rc.yield();

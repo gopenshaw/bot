@@ -4,12 +4,13 @@ import battlecode.common.*;
 
 public class MapLogic 
 {
-	private final static int NOT_SET_VALUE = -1;
+	public static Map map;
 	public static int nodeCount;
-	private static int mapWidth;
-	private static int mapHeight;
-	private static TerrainTile[][] map;
 	private static MapNode[] nodes = new MapNode[MapNode.MAX_MAP_NODES];
+	
+	public MapLogic(Map map) {
+		map = map;
+	}
 	
 	public static int getNodeCount()
 	{
@@ -27,6 +28,8 @@ public class MapLogic
 		int yMax = -1;
 		double max = 0;
 		
+		int mapWidth = map.MAP_WIDTH;
+		int mapHeight = map.MAP_HEIGHT;
 		for (int i = 0; i < mapWidth; i+= skipCount)
 		{
 			for (int j = 0; j < mapHeight; j+= skipCount)
@@ -55,8 +58,8 @@ public class MapLogic
 		
 		if (x < MIN_SQUARES 
 			|| y < MIN_SQUARES 
-			|| x + MIN_SQUARES >= mapWidth
-			|| y + MIN_SQUARES >= mapHeight)
+			|| x + MIN_SQUARES >= map.MAP_WIDTH
+			|| y + MIN_SQUARES >= map.MAP_HEIGHT)
 			return false;
 		
 		for (int i = 1; i <= MIN_SQUARES; i ++)
@@ -80,51 +83,6 @@ public class MapLogic
 		final double DISTANCE_FROM_ENEMY_WEIGHT = 0.01;
 		return cowGrowth * COW_GROWTH_WEIGHT
 				+ new MapLocation(x, y).distanceSquaredTo(enemyHQ) * DISTANCE_FROM_ENEMY_WEIGHT;
-	}
-	
-	public static void buildMap(RobotController rc)
-	{
-		mapWidth = rc.getMapWidth();
-		mapHeight = rc.getMapHeight();
-		
-		map = new TerrainTile[mapWidth][mapHeight];
-		
-		for (int i = 0; i < mapWidth; i++)
-		{
-			for (int j = 0; j < mapHeight; j++) 
-			{
-				map[i][j] = rc.senseTerrainTile(new MapLocation(i, j));
-			}
-		}
-	}
-	
-	public static boolean coarsenMap(RobotController rc) throws GameActionException
-	{
-		boolean[][] squareCounted = new boolean[mapWidth][mapHeight];
-		
-		for (int i = 0; i < mapWidth; i++)
-		{
-			for (int j = 0; j < mapHeight; j++)
-			{
-				if (!squareCounted[i][j])
-				{
-					MapNode node = expandFromHere(i, j, mapWidth, mapHeight, map, squareCounted);
-					if (node != null)
-					{
-						node.index = nodeCount;
-						nodes[nodeCount++] = node;
-						if (nodeCount == MapNode.MAX_MAP_NODES)
-						{
-							return false;
-						}
-						setAdjacent(node);
-					}
-					
-				}
-			}
-		}
-		
-		return true;
 	}
 	
 	public static void markNodeIndexOnGrid(RobotController rc) 
@@ -155,64 +113,6 @@ public class MapLogic
 				otherNode.adjacent[otherNode.adjacentCount++] = node;
 			}
 		}
-	}
-	
-	private static int getMaxHeight(int x, int y, int mapHeight, TerrainTile[][] map, boolean[][] squareCounted)
-	{
-		int thisHeight = 0;
-		while (y + thisHeight + 1 < mapHeight
-				&& !squareCounted[x][y + thisHeight + 1]
-				&& map[x][y + thisHeight + 1] != TerrainTile.VOID)
-		{
-			squareCounted[x][y + thisHeight + 1] = true;
-			thisHeight++;
-		}
-		
-		return thisHeight;
-	}
-	
-	private static int getMaxWidth(int x, int y, int rectangleHeight, int mapWidth, int mapHeight, 
-			TerrainTile[][] map, boolean[][] squareCounted)
-	{
-		int thisWidth = 0;
-		boolean columnClear = true;
-		while (columnClear 
-				&& x + thisWidth + 1 < mapWidth)
-		{
-			for (int i = y; i <= y + rectangleHeight; i++)
-			{
-				if (map[x + thisWidth + 1][i] == TerrainTile.VOID)
-				{
-					columnClear = false;
-					break;
-				}
-			}
-			
-			if (columnClear)
-			{
-				for (int i = y; i <= y + rectangleHeight; i++)
-				{
-					squareCounted[x + thisWidth + 1][i] = true;
-				}
-				thisWidth++;
-			}
-		}
-		
-		return thisWidth;
-	}
-	
-	private static MapNode expandFromHere(int x, int y, int mapWidth, int mapHeight, 
-			TerrainTile[][] map, boolean[][] squareCounted)
-	{
-		squareCounted[x][y] = true;
-		if (map[x][y] == TerrainTile.VOID)
-		{
-			return null;
-		}
-		
-		int rectangleHeight = getMaxHeight(x, y, mapHeight, map, squareCounted);
-		int rectangleWidth = getMaxWidth(x, y, rectangleHeight, mapWidth, mapHeight, map, squareCounted);
-		return new MapNode(y, y + rectangleHeight, x, x + rectangleWidth);
 	}
 	
 	//--Need to do breadth first instead of depth first
