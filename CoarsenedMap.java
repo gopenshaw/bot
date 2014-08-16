@@ -9,6 +9,7 @@ public class CoarsenedMap extends Map implements Resumable {
 	private int nodeCount;
 	private MapNode[] nodes;
 	private boolean[][] wasCounted;
+	private boolean complete;
 	
 	private int i;
 	private int j;
@@ -22,6 +23,11 @@ public class CoarsenedMap extends Map implements Resumable {
 	@Override
 	public Status resume() 
 	{
+		if (complete)
+		{
+			return Status.COMPLETED;
+		}
+		
 		if (coarsenMap(i, j) == Status.ABORTED)
 		{
 			return Status.ABORTED;
@@ -32,6 +38,7 @@ public class CoarsenedMap extends Map implements Resumable {
 		{
 			i = (i + 1) % super.MAP_WIDTH;
 			if (i == 0) {
+				complete = true;
 				return Status.COMPLETED;
 			}
 		}

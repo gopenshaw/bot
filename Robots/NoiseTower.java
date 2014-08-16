@@ -6,10 +6,12 @@ import bot.Enums.Status;
 
 public class NoiseTower 
 {
-	final static int ATTACK_DISTANCE = 6;
-	final static int DIRECTION_HOLD = 2;
+	final float LONG_ATTACK_DISTANCE = 12;
+	final float SHORT_ATTACK_DISTANCE = 1;
+	final float NUMBER_OF_STEPS = 5;
+	final float STEP_HOLD = 1;
 	
-	public static void run(RobotController rc)
+	public void run(RobotController rc)
 	{
 		try 
 		{
@@ -28,15 +30,20 @@ public class NoiseTower
 			{
 				for (int i = 0; i < 8; i++)
 				{
-					for (int j = 0; j < DIRECTION_HOLD; j++)
+					for (int j = 0; j < NUMBER_OF_STEPS; j++)
 					{
-						MapLocation attackSquare = location.add(Direction.values()[i], ATTACK_DISTANCE);
-						if (rc.canAttackSquare(attackSquare))
+						for (int k = 0; k < STEP_HOLD; k++)
 						{
-							rc.attackSquare(attackSquare);
+							int attackDistance = Math.round(LONG_ATTACK_DISTANCE -
+									(LONG_ATTACK_DISTANCE - SHORT_ATTACK_DISTANCE) / NUMBER_OF_STEPS * j);
+							MapLocation attackSquare = location.add(Direction.values()[i], attackDistance);
+							if (rc.canAttackSquare(attackSquare))
+							{
+								rc.attackSquare(attackSquare);
+							}
+							rc.yield();
+							rc.yield();
 						}
-						rc.yield();
-						rc.yield();
 					}
 				}
 			}

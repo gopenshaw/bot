@@ -27,7 +27,7 @@ public class RobotPlayer {
 		}
 		else if (rc.getType() == RobotType.NOISETOWER)
 		{
-			NoiseTower.run(rc);
+			new NoiseTower().run(rc);
 		}
 	}
 }

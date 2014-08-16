@@ -6,23 +6,37 @@ import battlecode.common.RobotController;
 
 public class MapLogic 
 {
-	public static Map map;
+	private final Map MAP;
 	public static int nodeCount;
 	private static MapNode[] nodes = new MapNode[MapNode.MAX_MAP_NODES];
 	
 	public MapLogic(Map map) {
-		map = map;
+		this.MAP = map;
 	}
 	
-	public static int getNodeCount()
+	public int getNodeCount()
 	{
 		return nodeCount;
 	}
 	
-	private static MapLocation calculatePastrLocation(RobotController rc) 
+	public void broadcastImportantLocation(RobotController rc) throws GameActionException
+	{
+		MapLocation pastrLocation = calculatePastrLocation(rc);
+		MapLocation rallyPoint = getMidpoint(rc.senseHQLocation(), pastrLocation);
+		Communication.setPastrLocation(pastrLocation, rc);
+		Communication.setRallyPoint(rallyPoint, rc);
+	}
+	
+	private MapLocation getMidpoint(MapLocation a, MapLocation b)
+	{
+		int x = (a.x + b.x) / 2;
+		int y = (a.y + b.y) / 2;
+		return new MapLocation(x, y);
+	}
+	
+	private MapLocation calculatePastrLocation(RobotController rc) 
 			throws GameActionException
 	{
-		
 		MapLocation enemyHQ = rc.senseEnemyHQLocation();
 		final double[][] cowGrowth = rc.senseCowGrowth();
 		final int skipCount = 2;
@@ -30,11 +44,9 @@ public class MapLogic
 		int yMax = -1;
 		double max = 0;
 		
-		int mapWidth = map.MAP_WIDTH;
-		int mapHeight = map.MAP_HEIGHT;
-		for (int i = 0; i < mapWidth; i+= skipCount)
+		for (int i = 0; i < MAP.MAP_WIDTH; i+= skipCount)
 		{
-			for (int j = 0; j < mapHeight; j+= skipCount)
+			for (int j = 0; j < MAP.MAP_HEIGHT; j+= skipCount)
 			{
 				if (!adjacentSquaresAreNonZero(cowGrowth, i, j))
 				{
@@ -54,14 +66,14 @@ public class MapLogic
 		return new MapLocation(xMax, yMax);
 	}
 	
-	private static boolean adjacentSquaresAreNonZero(double[][] cowGrowth, int x, int y)
+	private boolean adjacentSquaresAreNonZero(double[][] cowGrowth, int x, int y)
 	{
 		final int MIN_SQUARES = 4;
 		
 		if (x < MIN_SQUARES 
 			|| y < MIN_SQUARES 
-			|| x + MIN_SQUARES >= map.MAP_WIDTH
-			|| y + MIN_SQUARES >= map.MAP_HEIGHT)
+			|| x + MIN_SQUARES >= MAP.MAP_WIDTH
+			|| y + MIN_SQUARES >= MAP.MAP_HEIGHT)
 			return false;
 		
 		for (int i = 1; i <= MIN_SQUARES; i ++)
@@ -79,7 +91,7 @@ public class MapLogic
 		return true;
 	}
 	
-	private static double calculatePastrValue(int x, int y, double cowGrowth, MapLocation enemyHQ)
+	private double calculatePastrValue(int x, int y, double cowGrowth, MapLocation enemyHQ)
 	{
 		final double COW_GROWTH_WEIGHT = 1000;
 		final double DISTANCE_FROM_ENEMY_WEIGHT = 0.01;
@@ -87,7 +99,7 @@ public class MapLogic
 				+ new MapLocation(x, y).distanceSquaredTo(enemyHQ) * DISTANCE_FROM_ENEMY_WEIGHT;
 	}
 	
-	public static void markNodeIndexOnGrid(RobotController rc) 
+	public void markNodeIndexOnGrid(RobotController rc) 
 			throws GameActionException
 	{
 		for (int i = 0; i < nodeCount; i++)
@@ -103,8 +115,6 @@ public class MapLogic
 		}
 	}
 	
-	//--Need to do breadth first instead of depth first
-	//--Test on longetylong128 for a good example!
 	public static void createMapTo(MapLocation destination, RobotController rc) 
 		throws GameActionException
 	{

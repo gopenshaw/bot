@@ -6,26 +6,38 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;
 import bot.CoarsenedMap;
+import bot.Communication;
+import bot.MapLogic;
 import bot.Enums.Status;
+import bot.Enums.Tactic;
 
 public class HQ {
 	private CoarsenedMap map;
+	private double nextSpawnRound;
 	
 	public void run(RobotController rc)
 	{
+		try
+		{
+			spawnRobot(rc);
+			nextSpawnRound = Clock.getRoundNum()
+					+ GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 
+					+ (rc.senseRobotCount() + 1) * GameConstants.HQ_SPAWN_DELAY_CONSTANT_2;
+			rc.setIndicatorString(1, "next spawn round: " + nextSpawnRound);
+			map = new CoarsenedMap(rc);
+	
+			MapLogic mapLogic = new MapLogic(map);
+			mapLogic.broadcastImportantLocation(rc);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
 		while (true)
 		{
 			try
 			{
-				spawnRobot(rc);
-				double nextSpawnRound = Clock.getRoundNum()
-						+ GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 
-						+ (rc.senseRobotCount() + 1) * GameConstants.HQ_SPAWN_DELAY_CONSTANT_2;
-				rc.setIndicatorString(1, "next spawn round: " + nextSpawnRound);
-				
-				map = new CoarsenedMap(rc);
-				
-				
 				while (map.resume() == Status.IN_PROGRESS)
 				{
 					if (Clock.getRoundNum() >= nextSpawnRound)
@@ -40,6 +52,11 @@ public class HQ {
 				
 				rc.setIndicatorString(0, "coarsen complete!");
 				spawnRobot(rc);
+				
+				if (Clock.getRoundNum() > 300)
+				{
+					Communication.setTactic(Tactic.BUILD_PASTR, rc);
+				}
 				
 				
 				

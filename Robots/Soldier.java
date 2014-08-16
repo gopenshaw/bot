@@ -21,6 +21,7 @@ public class Soldier {
 	final int CLOSE_ENOUGH_DISTANCE = 3;
 	
 	private MapLocation MAP_CENTER;
+	private MapLocation NOT_SET = new MapLocation(0, 0);
 	
 	public void run(RobotController rc)
 	{
@@ -43,15 +44,11 @@ public class Soldier {
 						Tactic tactic = Communication.getTactic(rc);
 						switch (tactic)
 						{
-//						case BUILD_PASTR: buildPastr(navigation, rc);
-//							break;
-						case CONTROL_CENTER: controlCenter(navigation, rc);
+						case BUILD_PASTR: buildPastr(navigation, rc);
 							break;
 //						case DESTROY_PASTR: destroyPastr(navigation, rc);
 //							break;
-//						case RALLY: rally(navigation, rc);
-						default:
-							break;
+						case RALLY: rally(navigation, rc);
 						}
 					}
 					
@@ -65,34 +62,34 @@ public class Soldier {
 		}
 	}
 	
-//	private static void buildPastr(MovementLogic navigation, RobotController rc) 
-//			throws GameActionException
-//	{
-//		rc.setIndicatorString(0, "build pastr");
-//		MapLocation destination = Communication.getRallyPoint(rc);
-//		MapLocation currentLocation = rc.getLocation();
-//		if (currentLocation.distanceSquaredTo(destination) < CLOSE_ENOUGH_DISTANCE)
-//		{
-//			Status pastrStatus = Communication.getPastrBuildingStatus(rc);
-//			Status noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
-//			
-//			if (noiseTowerStatus == Status.NOT_SET)
-//			{
-//				rc.construct(RobotType.NOISETOWER);
-//				Communication.setNoiseTowerBuildingStatus(Status.IN_PROGRESS, rc);
-//			}
-//			else if (pastrStatus == Status.NOT_SET
-//					&& noiseTowerStatus == Status.COMPLETED)
-//			{
-//				rc.construct(RobotType.PASTR);
-//				Communication.setPastrBuildingStatus(Status.IN_PROGRESS, rc);
-//			}
-//		}
-//		else
-//		{
-//			navigation.moveToward(destination, rc);
-//		}
-//	}
+	private void buildPastr(MovementLogic navigation, RobotController rc) 
+			throws GameActionException
+	{
+		rc.setIndicatorString(0, "build pastr");
+		MapLocation destination = Communication.getPastrLocation(rc);
+		MapLocation currentLocation = rc.getLocation();
+		if (currentLocation.distanceSquaredTo(destination) < CLOSE_ENOUGH_DISTANCE)
+		{
+			Status pastrStatus = Communication.getPastrBuildingStatus(rc);
+			Status noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
+			
+			if (noiseTowerStatus == Status.NOT_SET)
+			{
+				rc.construct(RobotType.NOISETOWER);
+				Communication.setNoiseTowerBuildingStatus(Status.IN_PROGRESS, rc);
+			}
+			else if (pastrStatus == Status.NOT_SET
+					&& noiseTowerStatus == Status.COMPLETED)
+			{
+				rc.construct(RobotType.PASTR);
+				Communication.setPastrBuildingStatus(Status.IN_PROGRESS, rc);
+			}
+		}
+		else
+		{
+			navigation.moveToward(destination, rc);
+		}
+	}
 	
 	private void controlCenter(MovementLogic navigation, RobotController rc) 
 			throws GameActionException
@@ -114,8 +111,13 @@ public class Soldier {
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "rally");
-//		MapLocation destination = Communication.getRallyPoint(rc);
-		MapLocation destination = null;
+		MapLocation destination = Communication.getRallyPoint(rc);
+		if (destination == NOT_SET)
+		{
+			destination = MAP_CENTER;
+			rc.setIndicatorString(0, "rally center");
+		}
+
 		MapLocation currentLocation = rc.getLocation();
 		if (currentLocation.distanceSquaredTo(destination) > CLOSE_ENOUGH_DISTANCE)
 		{
