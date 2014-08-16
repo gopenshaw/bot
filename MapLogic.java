@@ -1,6 +1,8 @@
 package bot;
 
-import battlecode.common.*;
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 
 public class MapLogic 
 {
@@ -97,20 +99,6 @@ public class MapLogic
 				{
 					Communication.setNodeIndex(i, new MapLocation(x, y), rc);
 				}
-			}
-		}
-	}
-	
-	private static void setAdjacent(MapNode node)
-	{
-		int nodeIndex = node.index;
-		for (int i = 0; i < nodeIndex; i++)
-		{
-			MapNode otherNode = nodes[i];
-			if (node.isAdjacent(otherNode))
-			{
-				node.adjacent[node.adjacentCount++] = otherNode;
-				otherNode.adjacent[otherNode.adjacentCount++] = node;
 			}
 		}
 	}

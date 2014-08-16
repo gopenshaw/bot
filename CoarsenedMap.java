@@ -1,7 +1,8 @@
 package bot;
 
-import battlecode.common.*;
-import bot.Enums.*;
+import battlecode.common.RobotController;
+import battlecode.common.TerrainTile;
+import bot.Enums.Status;
 
 public class CoarsenedMap extends Map implements Resumable {
 

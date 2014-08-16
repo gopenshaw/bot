@@ -1,8 +1,12 @@
 package bot.Robots;
 
-import battlecode.common.*;
-import bot.*;
-import bot.Enums.*;
+import battlecode.common.Clock;
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
+import battlecode.common.RobotController;
+import bot.CoarsenedMap;
+import bot.Enums.Status;
 
 public class HQ {
 	private CoarsenedMap map;

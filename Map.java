@@ -1,6 +1,8 @@
 package bot;
 
-import battlecode.common.*;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import battlecode.common.TerrainTile;
 
 public class Map {
 	public final int MAP_WIDTH;
