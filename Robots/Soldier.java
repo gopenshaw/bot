@@ -19,10 +19,11 @@ public class Soldier {
 	final int SELF_DESTRUCT_HEALTH_THRESHOLD = 38;
 	final int SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD = 3;
 	final int SELF_DESTRUCT_WALK_STEPS = 2;
-	final int CLOSE_ENOUGH_DISTANCE = 3;
+	final int SOLDIER_CLOSE_ENOUGH_DISTANCE = 3;
+	final int FARM_CLOSE_ENOUGH_DISTANCE = 1;
+	final int FARM_SNEAK_DISTANCE = 50;
 	
-	private MapLocation MAP_CENTER;
-	private MapLocation NOT_SET = new MapLocation(0, 0);
+	private boolean sneak;
 	
 	public void run(RobotController rc)
 	{
@@ -37,7 +38,7 @@ public class Soldier {
 							Robot.class, 10, rc.getTeam().opponent());
 					
 					if (nearbyEnemies.length > 0
-						&& !(nearbyEnemies.length != 1
+						&& !(nearbyEnemies.length == 1
 						&& rc.senseRobotInfo(nearbyEnemies[0]).type == RobotType.HQ))
 					{
 						defendFrom(nearbyEnemies, rc);
@@ -72,18 +73,24 @@ public class Soldier {
 		rc.setIndicatorString(0, "build pastr");
 		MapLocation destination = Communication.getPointOfInterest(PointOfInterest.Team_Pastr, rc);
 		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(destination) < CLOSE_ENOUGH_DISTANCE)
+		
+		int distance = currentLocation.distanceSquaredTo(destination);
+		sneak = (distance <= FARM_SNEAK_DISTANCE);
+		
+		if (distance <= SOLDIER_CLOSE_ENOUGH_DISTANCE)
 		{
 			Status pastrStatus = Communication.getPastrBuildingStatus(rc);
 			Status noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
 			
-			if (noiseTowerStatus == Status.NOT_SET)
+			if (noiseTowerStatus == Status.NOT_SET
+				&& distance <= FARM_CLOSE_ENOUGH_DISTANCE)
 			{
 				rc.construct(RobotType.NOISETOWER);
 				Communication.setNoiseTowerBuildingStatus(Status.IN_PROGRESS, rc);
 			}
 			else if (pastrStatus == Status.NOT_SET
-					&& noiseTowerStatus == Status.COMPLETED)
+					&& noiseTowerStatus == Status.COMPLETED
+					&& distance <= FARM_CLOSE_ENOUGH_DISTANCE)
 			{
 				rc.construct(RobotType.PASTR);
 				Communication.setPastrBuildingStatus(Status.IN_PROGRESS, rc);
@@ -91,7 +98,8 @@ public class Soldier {
 		}
 		else
 		{
-			navigation.moveToward(PointOfInterest.Team_Pastr, rc);
+			navigation.moveToward(PointOfInterest.Team_Pastr, sneak, rc);
+			sneak = false;
 		}
 	}
 	
@@ -101,9 +109,9 @@ public class Soldier {
 		rc.setIndicatorString(0, "rally");
 		MapLocation destination = Communication.getPointOfInterest(PointOfInterest.Rally_Point, rc);
 		MapLocation currentLocation = rc.getLocation();
-		if (currentLocation.distanceSquaredTo(destination) > CLOSE_ENOUGH_DISTANCE)
+		if (currentLocation.distanceSquaredTo(destination) > SOLDIER_CLOSE_ENOUGH_DISTANCE)
 		{
-			navigation.moveToward(PointOfInterest.Rally_Point, rc);
+			navigation.moveToward(PointOfInterest.Rally_Point, false, rc);
 		}
 	}
 	
@@ -111,7 +119,7 @@ public class Soldier {
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "destroy pastr");
-		navigation.moveToward(PointOfInterest.Enemy_Pastr, rc);
+		navigation.moveToward(PointOfInterest.Enemy_Pastr, false, rc);
 	}
 	
 	private void defendFrom(Robot[] nearbyEnemies, RobotController rc) 

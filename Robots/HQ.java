@@ -19,6 +19,8 @@ public class HQ {
 	private MapLogic mapLogic;
 	private int enemyPastrCount;
 	private MapLocation enemyPastr;
+	private int previousRoundNumber;
+	private boolean coarsenComplete;
 	
 	public void run(RobotController rc)
 	{
@@ -35,7 +37,6 @@ public class HQ {
 				case 1:
 					//--init maps and calculate team pastr location
 					nextSpawnRound = spawnRobot(rc);
-					rc.setIndicatorString(1, "next spawn round: " + nextSpawnRound);
 					map = new CoarsenedMap(rc);
 					mapLogic = new MapLogic(map);
 					mapLogic.calculateTeamPastrLocation(rc);
@@ -48,6 +49,13 @@ public class HQ {
 					//--build the coarsened map
 					while (map.resume() == Status.IN_PROGRESS)
 					{
+						int roundNumber = Clock.getRoundNum();
+						if (roundNumber > previousRoundNumber)
+						{
+							setTactic(rc);
+							previousRoundNumber = roundNumber;
+						}
+						
 						if (Clock.getRoundNum() >= nextSpawnRound)
 						{
 							double temp = spawnRobot(rc);
@@ -59,11 +67,11 @@ public class HQ {
 							rc.setIndicatorString(1, "next spawn round: " + nextSpawnRound);
 						}
 					}
+					coarsenComplete = true;
 					break;
 				case 3:
 					//--build maps
-					map.createMapTo(PointOfInterest.Rally_Point, mapLogic.teamPastrLocation, rc);
-					rc.setIndicatorString(1, "map to rally point built");
+					map.createMapTo(PointOfInterest.Team_Pastr, mapLogic.teamPastrLocation, rc);
 				}
 				
 				spawnRobot(rc);
@@ -96,8 +104,12 @@ public class HQ {
 			Communication.setPointOfInterest(PointOfInterest.Enemy_Pastr, enemyPastrLocations[0], rc);
 			Communication.setTactic(Tactic.DESTROY_PASTR, rc);
 			rc.setIndicatorString(2, "tactic set to destroy enemy pastr");
-			map.createMapTo(PointOfInterest.Enemy_Pastr, enemyPastrLocations[0], rc);
-			rc.setIndicatorString(2, "map to enemy pastr calculated");
+			
+			if (coarsenComplete)
+			{
+				map.createMapTo(PointOfInterest.Enemy_Pastr, enemyPastrLocations[0], rc);
+				rc.setIndicatorString(2, "map to enemy pastr calculated");
+			}
 		}
 		else if (enemyPastrDestroyed)
 		{

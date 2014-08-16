@@ -22,7 +22,7 @@ public class MovementLogic {
 	//if the distance to the destination from the corners of an obstacle are never
 	//shorter than the initial distance when the robot first hit the obstacle.
 	//--TODO: There are a few ways that this bug movement algorithm could be optimized..
-	public void moveToward(PointOfInterest poi, RobotController rc) 
+	public void moveToward(PointOfInterest poi, boolean sneak, RobotController rc) 
 			throws GameActionException
 	{
 		MapLocation currentLocation = rc.getLocation();
@@ -30,7 +30,7 @@ public class MovementLogic {
 		if (segmentDestination == null)
 		{
 			MapLocation destination = Communication.getPointOfInterest(poi, rc);
-			this.moveToward(destination, rc);
+			this.moveToward(destination, sneak, rc);
 			return;
 		}
 		
@@ -39,21 +39,21 @@ public class MovementLogic {
 		
 		if (rc.canMove(direction))
 		{
-			rc.move(direction);
+			sneakIfTrueElseMove(direction, sneak, rc);
 		}
 		else if (rc.canMove(direction.rotateRight()))
 		{
-			rc.move(direction.rotateRight());
+			sneakIfTrueElseMove(direction.rotateRight(), sneak, rc);
 		}
 		else if (rc.canMove(direction.rotateLeft()))
 		{
-			rc.move(direction.rotateLeft());
+			sneakIfTrueElseMove(direction.rotateLeft(), sneak, rc);
 		}
 		
 		return;
 	}
 	
-	public void moveToward(MapLocation destination, RobotController rc) throws GameActionException
+	public void moveToward(MapLocation destination, boolean sneak, RobotController rc) throws GameActionException
 	{
 		//--If the robot was following a wall but there is a new destination,
 		//this will force the robot to recalculate its distance from the destination
@@ -77,7 +77,7 @@ public class MovementLogic {
 			
 			if (rc.canMove(direction))
 			{
-				rc.move(direction);
+				sneakIfTrueElseMove(direction, sneak, rc);
 				this.currentDirection = direction;
 				return;
 			}
@@ -98,7 +98,7 @@ public class MovementLogic {
 				turnLeft(rc, this.currentDirection.rotateRight().rotateRight()):
 				turnRight(rc, this.currentDirection.rotateLeft().rotateLeft());
 				
-		rc.move(this.currentDirection);
+		sneakIfTrueElseMove(this.currentDirection, sneak, rc);
 		
 		//--If the robot normally turns left but turned right, or normally
 		//turns right but has turned left, then it just rounded an exterior
@@ -120,7 +120,20 @@ public class MovementLogic {
 		}
 	}
 	
-	private static Direction turnRight(
+	private void sneakIfTrueElseMove(Direction direction, boolean sneak, RobotController rc) 
+			throws GameActionException
+	{
+		if (sneak)
+		{
+			rc.sneak(direction);
+		}
+		else
+		{
+			rc.move(direction);
+		}
+	}
+	
+	private Direction turnRight(
 			RobotController rc, Direction direction)
 	{
 		while (!rc.canMove(direction))

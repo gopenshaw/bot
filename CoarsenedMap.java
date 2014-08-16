@@ -98,11 +98,8 @@ public class CoarsenedMap extends Map implements Resumable
 		MapNode[] nodeQueue = new MapNode[MapNode.MAX_MAP_NODES];
 		
 		int nodeIndex = Communication.getNodeIndex(destination, rc);
-		System.out.println("destination is: " + destination.toString());
-		System.out.println(destination.toString() + " is contained in " + nodes[nodeIndex].toString());
 		MapNode node = nodes[nodeIndex];
 		wasMapped[nodeIndex] = true;
-		System.out.println("node " + node.toString() + " is going to " + destination.toString());
 		Communication.setNodeTarget(nodeIndex, poi, destination, rc);
 		
 		int queueIndex = 0;
@@ -128,7 +125,6 @@ public class CoarsenedMap extends Map implements Resumable
 				
 				
 				MapLocation target = adjacent.getAdjacentLocationIn(node);
-				System.out.println("node " + adjacent.toString() + " is going to " + target.toString());
 				Communication.setNodeTarget(index, poi, target, rc);
 				nodeQueue[queueSize++] = adjacent;
 			}
