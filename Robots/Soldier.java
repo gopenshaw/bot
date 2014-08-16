@@ -1,6 +1,5 @@
 package bot.Robots;
 
-import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.Robot;
@@ -16,11 +15,8 @@ import bot.Enums.Tactic;
 public class Soldier {
 	
 	//--Soldier self destruct
-	final int SELF_DESTRUCT_HEALTH_THRESHOLD = 38;
-	final int SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD = 3;
-	final int SELF_DESTRUCT_WALK_STEPS = 2;
-	final int SOLDIER_CLOSE_ENOUGH_DISTANCE = 3;
-	final int FARM_CLOSE_ENOUGH_DISTANCE = 1;
+	private final int SOLDIER_CLOSE_ENOUGH_DISTANCE = 3;
+	private final int FARM_CLOSE_ENOUGH_DISTANCE = 1;
 	
 	public void run(RobotController rc)
 	{
@@ -50,6 +46,7 @@ public class Soldier {
 						case DESTROY_PASTR: destroyPastr(navigation, rc);
 							break;
 						case RALLY: rally(navigation, rc);
+						rc.setIndicatorString(1, "rally");
 							break;
 						}
 					}
@@ -79,14 +76,16 @@ public class Soldier {
 			Status noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
 			
 			if (noiseTowerStatus == Status.NOT_SET
-				&& distance <= FARM_CLOSE_ENOUGH_DISTANCE)
+				&& distance <= FARM_CLOSE_ENOUGH_DISTANCE
+				&& rc.getHealth() > 70)
 			{
 				rc.construct(RobotType.NOISETOWER);
 				Communication.setNoiseTowerBuildingStatus(Status.IN_PROGRESS, rc);
 			}
 			else if (pastrStatus == Status.NOT_SET
 					&& noiseTowerStatus == Status.COMPLETED
-					&& distance <= FARM_CLOSE_ENOUGH_DISTANCE)
+					&& distance <= FARM_CLOSE_ENOUGH_DISTANCE
+					&& rc.getHealth() > 70)
 			{
 				rc.construct(RobotType.PASTR);
 				Communication.setPastrBuildingStatus(Status.IN_PROGRESS, rc);
@@ -102,12 +101,12 @@ public class Soldier {
 			throws GameActionException
 	{
 		rc.setIndicatorString(0, "rally");
-		MapLocation destination = Communication.getPointOfInterest(PointOfInterest.Rally_Point, rc);
 		MapLocation currentLocation = rc.getLocation();
+		MapLocation destination = Communication.getPointOfInterest(PointOfInterest.Rally_Point, rc);
 		if (currentLocation.distanceSquaredTo(destination) > SOLDIER_CLOSE_ENOUGH_DISTANCE)
 		{
 			navigation.moveToward(PointOfInterest.Rally_Point, rc);
-		}
+		}	
 	}
 	
 	private void destroyPastr(MovementLogic navigation, RobotController rc)
@@ -120,16 +119,8 @@ public class Soldier {
 	private void defendFrom(Robot[] nearbyEnemies, RobotController rc) 
 			throws GameActionException
 	{
-		if (nearbyEnemies.length >= SELF_DESTRUCT_ENEMY_COUNT_TRESHOLD
-				&& rc.getHealth() < SELF_DESTRUCT_HEALTH_THRESHOLD)
-		{
-			initiateSelfDestruct(rc, nearbyEnemies);
-		}
-		else if (nearbyEnemies.length > 0)
-		{
-			rc.setIndicatorString(0, "attacking an enemy.");
-			attackAnEnemy(rc, nearbyEnemies);
-		}
+		rc.setIndicatorString(0, "attacking an enemy.");
+		attackAnEnemy(rc, nearbyEnemies);
 	}
 	
 	private void attackAnEnemy(RobotController rc, Robot[] nearbyEnemies)
@@ -143,24 +134,5 @@ public class Soldier {
 				break;
 			}
 		}
-	}
-
-	private void initiateSelfDestruct(RobotController rc,
-			Robot[] nearbyEnemies) throws GameActionException {
-		rc.setIndicatorString(0, "Self-destruct engaged.");
-		for (int i = 0; i < SELF_DESTRUCT_WALK_STEPS; i++)
-		{
-			MapLocation currentLocation = rc.getLocation();
-			MapLocation enemyLocation = rc.senseRobotInfo(nearbyEnemies[0]).location;
-			Direction moveDirection = currentLocation.directionTo(enemyLocation);
-			if (rc.canMove(moveDirection))
-			{
-				rc.move(moveDirection);
-			}
-			
-			rc.yield();
-		}
-		
-		rc.selfDestruct();
 	}
 }

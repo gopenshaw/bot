@@ -13,7 +13,8 @@ import bot.Enums.PointOfInterest;
 import bot.Enums.Status;
 import bot.Enums.Tactic;
 
-public class HQ {
+public class HQ
+{
 	private CoarsenedMap map;
 	private double nextSpawnRound;
 	private MapLogic mapLogic;
@@ -21,32 +22,30 @@ public class HQ {
 	private MapLocation enemyPastr;
 	private int previousRoundNumber;
 	private boolean coarsenComplete;
-	
+	public static final int TACTIC_INDICATOR_INDEX = 0;
+
 	public void run(RobotController rc)
 	{
-		int hqStep = 0;
-		
+		int hqStep = 1;
+		MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
+
 		while (true)
 		{
 			try
 			{
-				hqStep++;
-				
 				switch (hqStep)
 				{
 				case 1:
-					//--init maps and calculate team pastr location
+					// --init maps and calculate team pastr location
 					nextSpawnRound = spawnRobot(rc);
 					map = new CoarsenedMap(rc);
 					mapLogic = new MapLogic(map);
 					mapLogic.calculateTeamPastrLocation(rc);
 					Communication.setPointOfInterest(
-							PointOfInterest.Team_Pastr, mapLogic.teamPastrLocation, rc);
-					Communication.setPointOfInterest(
-							PointOfInterest.Rally_Point, mapLogic.teamPastrLocation, rc);
-					break;
+							PointOfInterest.Rally_Point, center, rc);
+					hqStep++;
 				case 2:
-					//--build the coarsened map
+					// --build the coarsened map
 					while (map.resume() == Status.IN_PROGRESS)
 					{
 						int roundNumber = Clock.getRoundNum();
@@ -55,7 +54,7 @@ public class HQ {
 							setTactic(rc);
 							previousRoundNumber = roundNumber;
 						}
-						
+
 						if (Clock.getRoundNum() >= nextSpawnRound)
 						{
 							double temp = spawnRobot(rc);
@@ -63,79 +62,79 @@ public class HQ {
 							{
 								nextSpawnRound = temp;
 							}
-							
-							rc.setIndicatorString(1, "next spawn round: " + nextSpawnRound);
+
+							rc.setIndicatorString(1, "next spawn round: "
+									+ nextSpawnRound);
 						}
 					}
 					coarsenComplete = true;
-					break;
+					rc.setIndicatorString(1, "coarsen complete!");
+					hqStep++;
 				case 3:
-					//--build maps
-					map.createMapTo(PointOfInterest.Team_Pastr, mapLogic.teamPastrLocation, rc);
+					// --build maps
+					map.createMapTo(PointOfInterest.Rally_Point, center, rc);
+					map.createMapTo(PointOfInterest.Team_Pastr,
+							mapLogic.teamPastrLocation, rc);
+					hqStep++;
 				}
-				
+
 				spawnRobot(rc);
 				setTactic(rc);
 				rc.yield();
-			}
-			catch (Exception e)
+			} catch (Exception e)
 			{
 				System.out.println("HQ Exception");
 				e.printStackTrace();
 			}
 		}
 	}
-	
-	private void setTactic(RobotController rc) 
-			throws GameActionException
+
+	private void setTactic(RobotController rc) throws GameActionException
 	{
-		MapLocation[] enemyPastrLocations = 
-				rc.sensePastrLocations(rc.getTeam().opponent());
-		
+		MapLocation[] enemyPastrLocations = rc.sensePastrLocations(rc.getTeam()
+				.opponent());
+
 		int currentEnemyPastrCount = enemyPastrLocations.length;
-		
+
 		boolean enemyPastrDestroyed = currentEnemyPastrCount < enemyPastrCount;
 		enemyPastrCount = currentEnemyPastrCount;
-		
-		if (enemyPastrCount > 0
-			&& !enemyPastrLocations[0].equals(enemyPastr))
+
+		if (enemyPastrCount > 0 && !enemyPastrLocations[0].equals(enemyPastr))
 		{
-			rc.setIndicatorString(1, "destroy enemy pastr!");
-			Communication.setPointOfInterest(PointOfInterest.Enemy_Pastr, enemyPastrLocations[0], rc);
+			Communication.setPointOfInterest(PointOfInterest.Enemy_Pastr,
+					enemyPastrLocations[0], rc);
 			Communication.setTactic(Tactic.DESTROY_PASTR, rc);
-			rc.setIndicatorString(2, "tactic set to destroy enemy pastr");
-			
+
 			if (coarsenComplete)
 			{
-				map.createMapTo(PointOfInterest.Enemy_Pastr, enemyPastrLocations[0], rc);
-				rc.setIndicatorString(2, "map to enemy pastr calculated");
+				map.createMapTo(PointOfInterest.Enemy_Pastr,
+						enemyPastrLocations[0], rc);
 			}
-		}
-		else if (enemyPastrDestroyed)
+		} else if (enemyPastrDestroyed)
 		{
 			enemyPastr = null;
-			rc.setIndicatorString(1, "build a pastr!");
 			Communication.setTactic(Tactic.BUILD_PASTR, rc);
 		}
 	}
 
-	//--TODO: Must have more intelligent spawn location(s).
+	// --TODO: Must have more intelligent spawn location(s).
 	private static double spawnRobot(RobotController rc)
-			throws GameActionException {
-		if (rc.isActive() && rc.senseRobotCount() < 25) 
+			throws GameActionException
+	{
+		if (rc.isActive() && rc.senseRobotCount() < 25)
 		{
-			Direction toEnemy = rc.getLocation().directionTo(rc.senseEnemyHQLocation());
-			if (rc.senseObjectAtLocation(rc.getLocation().add(toEnemy)) == null) 
+			Direction toEnemy = rc.getLocation().directionTo(
+					rc.senseEnemyHQLocation());
+			if (rc.senseObjectAtLocation(rc.getLocation().add(toEnemy)) == null)
 			{
 				rc.spawn(toEnemy);
 				return Clock.getRoundNum()
-						+ GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 
-						+ (rc.senseRobotCount() + 1) * GameConstants.HQ_SPAWN_DELAY_CONSTANT_2;
+						+ GameConstants.HQ_SPAWN_DELAY_CONSTANT_1
+						+ (rc.senseRobotCount() + 1)
+						* GameConstants.HQ_SPAWN_DELAY_CONSTANT_2;
 			}
 		}
-		
+
 		return -1;
 	}
 }
-
-

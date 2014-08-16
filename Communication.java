@@ -2,6 +2,7 @@ package bot;
 
 import battlecode.common.*;
 import bot.Enums.*;
+import bot.Robots.HQ;
 
 public class Communication {
 
@@ -54,6 +55,7 @@ public class Communication {
 	public static void setTactic(
 			Tactic tactic, RobotController rc) throws GameActionException
 	{
+		rc.setIndicatorString(HQ.TACTIC_INDICATOR_INDEX, "tactic set: " + tactic);
 		rc.broadcast(TACTIC_CHANNEL, tactic.ordinal());
 	}
 	

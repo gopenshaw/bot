@@ -4,5 +4,6 @@ public enum Status {
 	NOT_SET,
 	IN_PROGRESS,
 	COMPLETED,
-	ABORTED
+	ABORTED,
+	DESTROYED
 }

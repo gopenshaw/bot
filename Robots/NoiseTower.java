@@ -6,9 +6,9 @@ import bot.Enums.Status;
 
 public class NoiseTower 
 {
-	final float LONG_ATTACK_DISTANCE = 10;
+	final float LONG_ATTACK_DISTANCE = 20;
 	final float SHORT_ATTACK_DISTANCE = 1;
-	final float NUMBER_OF_STEPS = 4;
+	final float NUMBER_OF_STEPS = 5;
 	final float STEP_HOLD = 1;
 	
 	public void run(RobotController rc)
@@ -28,6 +28,19 @@ public class NoiseTower
 		{
 			try
 			{
+				if (Communication.getPastrBuildingStatus(rc) == Status.COMPLETED
+					&& rc.sensePastrLocations(rc.getTeam()).length == 0)
+				{
+					Communication.setPastrBuildingStatus(Status.NOT_SET, rc);
+				}
+			} 
+			catch (GameActionException e1)
+			{
+				e1.printStackTrace();
+			}
+			
+			try
+			{
 				for (int i = 0; i < 4; i++)
 				{
 					for (int j = 0; j < NUMBER_OF_STEPS; j++)
@@ -40,9 +53,9 @@ public class NoiseTower
 							if (rc.canAttackSquare(attackSquare))
 							{
 								rc.attackSquare(attackSquare);
+								rc.yield();
+								rc.yield();
 							}
-							rc.yield();
-							rc.yield();
 						}
 					}
 				}
