@@ -42,13 +42,37 @@ public class MovementLogic {
 		{
 			moveOrSneak(direction, currentLocation, rc);
 		}
-		else if (rc.canMove(direction.rotateRight()))
+		else
 		{
-			moveOrSneak(direction.rotateRight(), currentLocation, rc);
-		}
-		else if (rc.canMove(direction.rotateLeft()))
-		{
-			moveOrSneak(direction.rotateLeft(), currentLocation, rc);
+			Direction newRight = direction.rotateRight();
+			if (rc.canMove(newRight))
+			{
+				moveOrSneak(newRight, currentLocation, rc);
+			}
+			else
+			{
+				Direction newLeft = direction.rotateLeft();
+				if (rc.canMove(newLeft))
+				{
+					moveOrSneak(newLeft, currentLocation, rc);
+				}
+				else
+				{
+					newRight = newRight.rotateRight();
+					if (rc.canMove(newRight))
+					{
+						moveOrSneak(newRight, currentLocation, rc);
+					}
+					else
+					{
+						newLeft = newLeft.rotateLeft();
+						if (rc.canMove(newLeft))
+						{
+							moveOrSneak(newLeft, currentLocation, rc);
+						}
+					}
+				}
+			}
 		}
 		
 		return;

@@ -76,9 +76,16 @@ public class HQ
 				case 3:
 					// --build maps
 					map.createMapTo(PointOfInterest.Rally_Point, center, rc);
-					map.createMapTo(PointOfInterest.Team_Pastr,
-							mapLogic.teamPastrLocation, rc);
 					hqStep++;
+					break;
+				case 4:
+					map.createMapTo(PointOfInterest.Team_Pastr, mapLogic.teamPastrLocation, rc);
+					hqStep++;
+					break;
+				case 5:
+					map.createMapTo(PointOfInterest.Pastr_Defense, mapLogic.teamPastrLocation, rc);
+					hqStep++;
+					break;
 				}
 
 				spawnRobot(rc);

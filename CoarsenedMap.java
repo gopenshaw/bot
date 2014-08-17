@@ -96,7 +96,6 @@ public class CoarsenedMap extends Map implements Resumable
 	{
 		boolean[] wasMapped = new boolean[nodeIndex];
 		MapNode[] nodeQueue = new MapNode[MapNode.MAX_MAP_NODES];
-		
 		int nodeIndex = Communication.getNodeIndex(destination, rc);
 		MapNode node = nodes[nodeIndex];
 		wasMapped[nodeIndex] = true;

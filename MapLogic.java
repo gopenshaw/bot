@@ -1,5 +1,6 @@
 package bot;
 
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -43,8 +44,32 @@ public class MapLogic
 			}
 		}
 		
-		teamPastrLocation = new MapLocation(xMax, yMax);
+		if (xMax == -1 || yMax == -1)
+		{
+			for (int i = 0; i < MAP.MAP_WIDTH; i+= skipCount)
+			{
+				for (int j = 0; j < MAP.MAP_HEIGHT; j+= skipCount)
+				{
+					double value = calculatePastrValue(i, j, cowGrowth[i][j], enemyHQ);
+					if (value > max)
+					{
+						max = value;
+						xMax = i;
+						yMax = j;
+					}
+				}
+			}
+			
+			teamPastrLocation = new MapLocation(xMax, yMax);
+		}
+		else
+		{
+			teamPastrLocation = new MapLocation(xMax, yMax);
+		}
+		
 		Communication.setPointOfInterest(PointOfInterest.Team_Pastr, teamPastrLocation, rc);
+		Direction directionToEnemyHQ = teamPastrLocation.directionTo(rc.senseEnemyHQLocation());
+		Communication.setPointOfInterest(PointOfInterest.Pastr_Defense, teamPastrLocation.add(directionToEnemyHQ, 3), rc);
 	}
 	
 	private boolean adjacentSquaresAreNonZero(double[][] cowGrowth, int x, int y)

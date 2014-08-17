@@ -15,8 +15,9 @@ import bot.Enums.Tactic;
 public class Soldier {
 	
 	//--Soldier self destruct
-	private final int SOLDIER_CLOSE_ENOUGH_DISTANCE = 3;
-	private final int FARM_CLOSE_ENOUGH_DISTANCE = 1;
+	private final int SOLDIER_CLOSE_ENOUGH_DISTANCE = 5;
+	private final int FARM_CLOSE_ENOUGH_DISTANCE = 2;
+	private final int FRIENDLY_COUNT_FOR_FARM = 5;
 	
 	public void run(RobotController rc)
 	{
@@ -64,20 +65,38 @@ public class Soldier {
 	private void buildPastr(MovementLogic navigation, RobotController rc) 
 			throws GameActionException
 	{
-		rc.setIndicatorString(0, "build pastr");
-		MapLocation destination = Communication.getPointOfInterest(PointOfInterest.Team_Pastr, rc);
 		MapLocation currentLocation = rc.getLocation();
+		MapLocation destination = null;
+		Status pastrStatus = Communication.getPastrBuildingStatus(rc);
+		Status noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
+		boolean farmBuilt = (pastrStatus == Status.IN_PROGRESS
+				|| pastrStatus == Status.COMPLETED)
+				&& (noiseTowerStatus == Status.IN_PROGRESS
+				|| noiseTowerStatus == Status.COMPLETED);
+		
+		if (farmBuilt)
+		{
+			destination = Communication.getPointOfInterest(PointOfInterest.Pastr_Defense, rc);
+		}
+		else
+		{
+			destination = Communication.getPointOfInterest(PointOfInterest.Team_Pastr, rc);
+		}
+		
 		
 		int distance = currentLocation.distanceSquaredTo(destination);
-		
-		if (distance <= SOLDIER_CLOSE_ENOUGH_DISTANCE)
+		if (distance > SOLDIER_CLOSE_ENOUGH_DISTANCE)
 		{
-			Status pastrStatus = Communication.getPastrBuildingStatus(rc);
-			Status noiseTowerStatus = Communication.getNoiseTowerBuildingStatus(rc);
-			
+			rc.setIndicatorString(2, "going to pastr");
+			navigation.moveToward(PointOfInterest.Team_Pastr, rc);
+		}
+		else if (!farmBuilt)
+		{
+			int friendlyCount = rc.senseNearbyGameObjects(Robot.class, 10, rc.getTeam()).length;
 			if (noiseTowerStatus == Status.NOT_SET
 				&& distance <= FARM_CLOSE_ENOUGH_DISTANCE
-				&& rc.getHealth() > 70)
+				&& rc.getHealth() > 70
+				&& friendlyCount > FRIENDLY_COUNT_FOR_FARM)
 			{
 				rc.construct(RobotType.NOISETOWER);
 				Communication.setNoiseTowerBuildingStatus(Status.IN_PROGRESS, rc);
@@ -85,19 +104,16 @@ public class Soldier {
 			else if (pastrStatus == Status.NOT_SET
 					&& noiseTowerStatus == Status.IN_PROGRESS
 					&& distance <= FARM_CLOSE_ENOUGH_DISTANCE
-					&& rc.getHealth() > 70)
+					&& rc.getHealth() > 70
+					&& friendlyCount > FRIENDLY_COUNT_FOR_FARM)
 			{
 				rc.construct(RobotType.PASTR);
 				Communication.setPastrBuildingStatus(Status.IN_PROGRESS, rc);
 			}
-			else
+			else if (distance > FARM_CLOSE_ENOUGH_DISTANCE)
 			{
 				navigation.moveToward(PointOfInterest.Team_Pastr, rc);
 			}
-		}
-		else
-		{
-			navigation.moveToward(PointOfInterest.Team_Pastr, rc);
 		}
 	}
 	
@@ -110,7 +126,7 @@ public class Soldier {
 		if (currentLocation.distanceSquaredTo(destination) > SOLDIER_CLOSE_ENOUGH_DISTANCE)
 		{
 			navigation.moveToward(PointOfInterest.Rally_Point, rc);
-		}	
+		}
 	}
 	
 	private void destroyPastr(MovementLogic navigation, RobotController rc)

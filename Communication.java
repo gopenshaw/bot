@@ -6,7 +6,7 @@ import bot.Robots.HQ;
 
 public class Communication {
 
-	private final static int POINT_OF_INTEREST_BASE_CHANNEL = 10000;
+	private final static int POINT_OF_INTEREST_BASE_CHANNEL = 10010;
 	
 	private final static int PASTR_STATUS_CHANNEL = 10004;
 	private final static int NOISE_TOWER_STATUS_CHANNEL = 10005;
@@ -26,7 +26,6 @@ public class Communication {
 	public static void setNoiseTowerLifeSignal(int signal, RobotController rc) 
 			throws GameActionException
 	{
-		System.out.println(signal);
 		rc.broadcast(PASTR_LIFE_SIGNAL_CHANNEL, signal);
 	}
 	
